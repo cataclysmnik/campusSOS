@@ -33,18 +33,18 @@ export default function NewIncidentPage() {
   const [error, setError] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const categories: { value: IncidentCategory; label: string; emoji: string }[] = [
-    { value: 'medical-emergency', label: 'Medical Emergency', emoji: '🏥' },
-    { value: 'fire', label: 'Fire', emoji: '🔥' },
-    { value: 'harassment', label: 'Harassment', emoji: '⚠️' },
-    { value: 'theft', label: 'Theft', emoji: '🚨' },
-    { value: 'vandalism', label: 'Vandalism', emoji: '🔨' },
-    { value: 'lost-item', label: 'Lost Item', emoji: '🔍' },
-    { value: 'found-item', label: 'Found Item', emoji: '📦' },
-    { value: 'lab-accident', label: 'Lab Accident', emoji: '🧪' },
-    { value: 'facility-issue', label: 'Facility Issue', emoji: '🔧' },
-    { value: 'security-concern', label: 'Security Concern', emoji: '🛡️' },
-    { value: 'other', label: 'Other', emoji: '📝' },
+  const categories: { value: IncidentCategory; label: string }[] = [
+    { value: 'medical-emergency', label: 'Medical Emergency' },
+    { value: 'fire', label: 'Fire' },
+    { value: 'harassment', label: 'Harassment' },
+    { value: 'theft', label: 'Theft' },
+    { value: 'vandalism', label: 'Vandalism' },
+    { value: 'lost-item', label: 'Lost Item' },
+    { value: 'found-item', label: 'Found Item' },
+    { value: 'lab-accident', label: 'Lab Accident' },
+    { value: 'facility-issue', label: 'Facility Issue' },
+    { value: 'security-concern', label: 'Security Concern' },
+    { value: 'other', label: 'Other' },
   ];
 
   const handleInputChange = (
@@ -170,49 +170,71 @@ export default function NewIncidentPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-secondary)' }}>
         <Navbar />
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-xl shadow-md p-8">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Report an Incident</h1>
-              <p className="text-gray-600">
+        <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+          <div className="card" style={{ maxWidth: '64rem', margin: '0 auto' }}>
+            <div className="card-header">
+              <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+                Report an Incident
+              </h1>
+              <p style={{ color: 'var(--text-secondary)' }}>
                 Provide details about the incident. All fields marked with * are required.
               </p>
-              <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-red-800 text-sm font-semibold">
-                  🚨 For life-threatening emergencies, call Campus Security immediately: 911
-                </p>
+              <div className="alert-error" style={{ marginTop: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'start', gap: '0.75rem' }}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '0.125rem' }}>
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                  <p style={{ fontWeight: '600', fontSize: '0.875rem', margin: 0 }}>
+                    For life-threatening emergencies, call Campus Security immediately: 911
+                  </p>
+                </div>
               </div>
             </div>
 
             {error && (
-              <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-                {error}
+              <div style={{ padding: '0 1.5rem' }}>
+                <div className="alert-error" style={{ marginBottom: '1rem' }}>
+                  {error}
+                </div>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               {/* Category Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="label" style={{ marginBottom: '0.5rem' }}>
                   Incident Category *
                 </label>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div style={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                  gap: '0.75rem'
+                }}>
                   {categories.map((cat) => (
                     <button
                       key={cat.value}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, category: cat.value }))}
-                      className={`p-4 border-2 rounded-lg text-left transition-all ${
-                        formData.category === cat.value
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
-                      }`}
+                      style={{
+                        padding: '1rem',
+                        border: formData.category === cat.value ? '2px solid var(--primary)' : '2px solid var(--border-color)',
+                        borderRadius: '0.5rem',
+                        textAlign: 'left',
+                        backgroundColor: formData.category === cat.value ? 'var(--primary-light)' : 'var(--bg-primary)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        fontSize: '0.875rem',
+                        fontWeight: '500',
+                        color: 'var(--text-primary)'
+                      }}
+                      className="category-button"
                     >
-                      <div className="text-2xl mb-1">{cat.emoji}</div>
-                      <div className="text-sm font-medium">{cat.label}</div>
+                      {cat.label}
                     </button>
                   ))}
                 </div>
@@ -220,7 +242,7 @@ export default function NewIncidentPage() {
 
               {/* Title */}
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="title" className="label">
                   Title *
                 </label>
                 <input
@@ -230,14 +252,14 @@ export default function NewIncidentPage() {
                   required
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input"
                   placeholder="Brief summary of the incident"
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="description" className="label">
                   Description *
                 </label>
                 <textarea
@@ -247,15 +269,15 @@ export default function NewIncidentPage() {
                   rows={5}
                   value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="textarea"
                   placeholder="Provide detailed information about what happened..."
                 />
               </div>
 
               {/* Location */}
-              <div className="grid md:grid-cols-2 gap-4">
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
                 <div>
-                  <label htmlFor="location.building" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="location.building" className="label">
                     Building *
                   </label>
                   <input
@@ -265,13 +287,13 @@ export default function NewIncidentPage() {
                     required
                     value={formData.location.building}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input"
                     placeholder="e.g., Science Building"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="location.floor" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="location.floor" className="label">
                     Floor (Optional)
                   </label>
                   <input
@@ -280,13 +302,13 @@ export default function NewIncidentPage() {
                     name="location.floor"
                     value={formData.location.floor}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input"
                     placeholder="e.g., 2nd Floor"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="location.room" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="location.room" className="label">
                     Room Number (Optional)
                   </label>
                   <input
@@ -295,13 +317,13 @@ export default function NewIncidentPage() {
                     name="location.room"
                     value={formData.location.room}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input"
                     placeholder="e.g., Room 201"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="location.description" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="location.description" className="label">
                     Additional Location Details
                   </label>
                   <input
@@ -310,7 +332,7 @@ export default function NewIncidentPage() {
                     name="location.description"
                     value={formData.location.description}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="input"
                     placeholder="e.g., Near main entrance"
                   />
                 </div>
@@ -318,7 +340,7 @@ export default function NewIncidentPage() {
 
               {/* Severity */}
               <div>
-                <label htmlFor="severity" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="severity" className="label">
                   Severity Level *
                 </label>
                 <select
@@ -326,7 +348,7 @@ export default function NewIncidentPage() {
                   name="severity"
                   value={formData.severity}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="select"
                 >
                   <option value="low">Low - Minor issue</option>
                   <option value="medium">Medium - Moderate concern</option>
@@ -337,7 +359,7 @@ export default function NewIncidentPage() {
 
               {/* Image Upload */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="label" style={{ marginBottom: '0.5rem' }}>
                   Images (Optional, max 5)
                 </label>
                 <input
@@ -346,29 +368,43 @@ export default function NewIncidentPage() {
                   multiple
                   onChange={handleImageChange}
                   disabled={images.length >= 5}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input"
+                  style={{ cursor: 'pointer' }}
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
                   Maximum 5 images, each under 5MB
                 </p>
 
                 {/* Image Previews */}
                 {imagePreviews.length > 0 && (
-                  <div className="mt-4 grid grid-cols-3 gap-4">
+                  <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
                     {imagePreviews.map((preview, index) => (
-                      <div key={index} className="relative">
+                      <div key={index} style={{ position: 'relative' }}>
                         <img
                           src={preview}
                           alt={`Preview ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
+                          style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '0.5rem' }}
                         />
                         <button
                           type="button"
                           onClick={() => removeImage(index)}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                          style={{
+                            position: 'absolute',
+                            top: '0.5rem',
+                            right: '0.5rem',
+                            backgroundColor: 'var(--danger)',
+                            color: 'white',
+                            borderRadius: '50%',
+                            padding: '0.25rem',
+                            border: 'none',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                           </svg>
                         </button>
                       </div>
@@ -378,36 +414,42 @@ export default function NewIncidentPage() {
               </div>
 
               {/* Anonymous Option */}
-              <div className="flex items-center">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <input
                   type="checkbox"
                   id="isAnonymous"
                   name="isAnonymous"
                   checked={formData.isAnonymous}
                   onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  style={{ width: '1rem', height: '1rem', cursor: 'pointer' }}
                 />
-                <label htmlFor="isAnonymous" className="ml-2 block text-sm text-gray-700">
+                <label htmlFor="isAnonymous" style={{ fontSize: '0.875rem', color: 'var(--text-primary)', cursor: 'pointer' }}>
                   Submit anonymously (your identity will be hidden)
                 </label>
               </div>
 
               {/* Progress Bar */}
               {loading && uploadProgress > 0 && (
-                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div style={{ width: '100%', backgroundColor: 'var(--border-color)', borderRadius: '9999px', height: '0.625rem', overflow: 'hidden' }}>
                   <div
-                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  ></div>
+                    style={{ 
+                      backgroundColor: 'var(--primary)', 
+                      height: '100%', 
+                      borderRadius: '9999px', 
+                      transition: 'width 0.3s ease',
+                      width: `${uploadProgress}%`
+                    }}
+                  />
                 </div>
               )}
 
               {/* Submit Button */}
-              <div className="flex gap-4">
+              <div style={{ display: 'flex', gap: '1rem' }}>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 py-3 px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="btn btn-primary"
+                  style={{ flex: 1, padding: '0.75rem 1.5rem' }}
                 >
                   {loading ? 'Submitting...' : 'Submit Report'}
                 </button>
@@ -415,7 +457,8 @@ export default function NewIncidentPage() {
                   type="button"
                   onClick={() => router.back()}
                   disabled={loading}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="btn btn-outline"
+                  style={{ padding: '0.75rem 1.5rem' }}
                 >
                   Cancel
                 </button>
@@ -423,6 +466,13 @@ export default function NewIncidentPage() {
             </form>
           </div>
         </div>
+
+        <style jsx>{`
+          .category-button:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+          }
+        `}</style>
       </div>
     </ProtectedRoute>
   );
