@@ -171,7 +171,7 @@ export default function Navbar() {
                 gap: '0.25rem'
               }} className="user-details">
                 <p style={{ fontSize: '0.875rem', fontWeight: '600', color: 'var(--text-primary)' }}>
-                  {userProfile?.fullName || user.email}
+                  {userProfile?.displayName || user.email}
                 </p>
                 {userProfile && (
                   <span className={`badge ${getRoleBadgeClass(userProfile.role)}`} style={{ fontSize: '0.75rem' }}>

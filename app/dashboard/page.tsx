@@ -77,7 +77,7 @@ export default function DashboardPage() {
           <div className="card" style={{ marginBottom: '2rem' }}>
             <div className="card-body">
               <h1 style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
-                Welcome back, {userProfile?.fullName || 'User'}!
+                Welcome back, {userProfile?.displayName || 'User'}!
               </h1>
               <p style={{ color: 'var(--text-secondary)' }}>
                 Here's an overview of your reported incidents

@@ -47,7 +47,7 @@ export default function ProfilePage() {
               <div>
                 <label className="label">Full Name</label>
                 <p style={{ fontSize: '1.125rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                  {userProfile?.fullName}
+                  {userProfile?.displayName}
                 </p>
               </div>
               
