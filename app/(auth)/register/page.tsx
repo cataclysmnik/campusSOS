@@ -130,9 +130,11 @@ export default function RegisterPage() {
             >
               <option value="student">Student</option>
               <option value="staff">Staff</option>
+              <option value="admin">Admin</option>
+              <option value="responder">Responder</option>
             </select>
             <p className="mt-1 text-xs text-gray-500">
-              Admin and Responder accounts are created by administrators
+              Select Admin or Responder to manage campus incidents
             </p>
           </div>
 

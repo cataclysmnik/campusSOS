@@ -5,18 +5,23 @@ import { useParams, useRouter } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { getIncident, subscribeToIncident } from '@/lib/firebase/firestore';
-import { Incident } from '@/types/firebase';
+import { getIncident, subscribeToIncident, updateIncidentStatus } from '@/lib/firebase/firestore';
+import { Incident, IncidentStatus } from '@/types/firebase';
 
 export default function IncidentDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { userProfile } = useAuth();
+  const { user, userProfile } = useAuth();
   const incidentId = params.id as string;
 
   const [incident, setIncident] = useState<Incident | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showActionModal, setShowActionModal] = useState(false);
+  const [actionType, setActionType] = useState<'verify' | 'assign' | 'status' | 'reject'>('verify');
+  const [actionNotes, setActionNotes] = useState('');
+  const [actionStatus, setActionStatus] = useState<IncidentStatus>('verified');
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     if (!incidentId) return;
@@ -50,6 +55,34 @@ export default function IncidentDetailPage() {
       case 'medium': return 'text-yellow-600 bg-yellow-50';
       case 'low': return 'text-green-600 bg-green-50';
       default: return 'text-gray-600 bg-gray-50';
+    }
+  };
+
+  const openActionModal = (type: 'verify' | 'assign' | 'status' | 'reject') => {
+    setActionType(type);
+    setShowActionModal(true);
+  };
+
+  const handleAction = async () => {
+    if (!user || !incident) return;
+
+    setActionLoading(true);
+    try {
+      if (actionType === 'verify') {
+        await updateIncidentStatus(incident.id, 'verified', user.uid, actionNotes || 'Incident verified by admin');
+      } else if (actionType === 'reject') {
+        await updateIncidentStatus(incident.id, 'rejected', user.uid, actionNotes || 'Incident rejected');
+      } else if (actionType === 'status') {
+        await updateIncidentStatus(incident.id, actionStatus, user.uid, actionNotes || 'Status updated');
+      }
+
+      setShowActionModal(false);
+      setActionNotes('');
+    } catch (error) {
+      console.error('Action error:', error);
+      alert('Failed to perform action. Please try again.');
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -237,24 +270,103 @@ export default function IncidentDetailPage() {
             {userProfile && ['admin', 'responder'].includes(userProfile.role) && (
               <div className="px-8 pb-8 border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Actions</h3>
-                <div className="flex gap-3">
-                  <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-                    Verify Incident
-                  </button>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    Assign Responder
-                  </button>
-                  <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
+                <div className="flex flex-wrap gap-3">
+                  {incident.status === 'submitted' && (
+                    <button
+                      onClick={() => openActionModal('verify')}
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Verify Incident
+                    </button>
+                  )}
+                  <button
+                    onClick={() => openActionModal('status')}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
                     Update Status
                   </button>
-                  <button className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                    Reject
-                  </button>
+                  {incident.status !== 'rejected' && incident.status !== 'closed' && (
+                    <button
+                      onClick={() => openActionModal('reject')}
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    >
+                      Reject
+                    </button>
+                  )}
                 </div>
               </div>
             )}
           </div>
         </div>
+
+        {/* Action Modal */}
+        {showActionModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">
+                {actionType === 'verify' && 'Verify Incident'}
+                {actionType === 'reject' && 'Reject Incident'}
+                {actionType === 'status' && 'Update Status'}
+              </h3>
+
+              <div className="mb-4">
+                {actionType === 'status' && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">New Status</label>
+                    <select
+                      value={actionStatus}
+                      onChange={(e) => setActionStatus(e.target.value as IncidentStatus)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="verified">Verified</option>
+                      <option value="assigned">Assigned</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  </div>
+                )}
+
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Notes {actionType === 'reject' ? '(Required)' : '(Optional)'}
+                </label>
+                <textarea
+                  value={actionNotes}
+                  onChange={(e) => setActionNotes(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder={
+                    actionType === 'verify'
+                      ? 'Add verification notes...'
+                      : actionType === 'reject'
+                      ? 'Reason for rejection...'
+                      : 'Add status update notes...'
+                  }
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleAction}
+                  disabled={actionLoading || (actionType === 'reject' && !actionNotes)}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {actionLoading ? 'Processing...' : 'Confirm'}
+                </button>
+                <button
+                  onClick={() => {
+                    setShowActionModal(false);
+                    setActionNotes('');
+                  }}
+                  disabled={actionLoading}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
