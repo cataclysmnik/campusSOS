@@ -1,0 +1,68 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isImage() {
+      return request.resource.contentType.matches('image/.*');
+    }
+    
+    function isUnder5MB() {
+      return request.resource.size < 5 * 1024 * 1024;
+    }
+    
+    function getUserRole() {
+      return firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && getUserRole() in ['admin'];
+    }
+    
+    function isStaffOrAbove() {
+      return isSignedIn() && getUserRole() in ['staff', 'admin', 'responder'];
+    }
+    
+    // Incident images
+    match /incidents/{incidentId}/{fileName} {
+      // Anyone can read incident images
+      allow read: if isSignedIn();
+      
+      // Users can upload images for incidents (max 5MB, images only)
+      allow create: if isSignedIn() && 
+                       isImage() && 
+                       isUnder5MB();
+      
+      // Only uploader or admins can delete
+      allow delete: if isAdmin() || 
+                       (isSignedIn() && 
+                        resource.metadata.uploadedBy == request.auth.uid);
+    }
+    
+    // Profile pictures
+    match /profiles/{userId}/{fileName} {
+      // Anyone can read profile pictures
+      allow read: if true;
+      
+      // Users can upload their own profile picture
+      allow create, update: if isSignedIn() && 
+                               request.auth.uid == userId && 
+                               isImage() && 
+                               isUnder5MB();
+      
+      // Users can delete their own profile picture
+      allow delete: if isSignedIn() && 
+                       (request.auth.uid == userId || isAdmin());
+    }
+    
+    // Admin uploads (reports, documents, etc.)
+    match /admin/{allPaths=**} {
+      allow read: if isStaffOrAbove();
+      allow write: if isAdmin();
+    }
+  }
+}
