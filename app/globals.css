@@ -351,6 +351,15 @@ body {
   }
 }
 
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .dark .navbar-float {
   background-color: rgba(10, 10, 10, 0.8) !important;
 }

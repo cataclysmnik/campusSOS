@@ -16,10 +16,26 @@ export default function RoleGuard({ children, allowedRoles, fallback }: RoleGuar
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Checking permissions...</p>
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: 'var(--bg-secondary)'
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ 
+            width: '3rem', 
+            height: '3rem', 
+            border: '3px solid var(--border-color)',
+            borderTopColor: 'var(--primary)',
+            borderRadius: '50%',
+            animation: 'spin 1s linear infinite',
+            margin: '0 auto'
+          }}></div>
+          <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>
+            Checking permissions...
+          </p>
         </div>
       </div>
     );
@@ -31,20 +47,34 @@ export default function RoleGuard({ children, allowedRoles, fallback }: RoleGuar
     }
     
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="max-w-md w-full text-center">
-          <div className="bg-white p-8 rounded-xl shadow-lg">
-            <div className="text-red-500 text-5xl mb-4">🚫</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
-            <p className="text-gray-600 mb-6">
-              You don't have permission to access this page.
-            </p>
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Go to Dashboard
-            </button>
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: 'var(--bg-secondary)',
+        padding: '1rem'
+      }}>
+        <div style={{ maxWidth: '28rem', width: '100%', textAlign: 'center' }}>
+          <div className="card">
+            <div className="card-body" style={{ textAlign: 'center', padding: '2rem' }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--danger)', margin: '0 auto 1rem' }}>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+              </svg>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+                Access Denied
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                You don't have permission to access this page.
+              </p>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="btn btn-primary"
+              >
+                Go to Dashboard
+              </button>
+            </div>
           </div>
         </div>
       </div>
