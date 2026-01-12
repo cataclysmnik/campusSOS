@@ -68,25 +68,38 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">CampusSOS</h1>
-          <h2 className="text-2xl font-semibold text-gray-800">Create Account</h2>
-          <p className="mt-2 text-sm text-gray-600">
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      alignItems: 'center', 
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)',
+      padding: '3rem 1rem',
+      marginTop: '-6.5rem'
+    }}>
+      <div className="card" style={{ maxWidth: '28rem', width: '100%' }}>
+        <div className="card-header" style={{ textAlign: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg>
+            <h1 style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--text-primary)' }}>CampusSOS</h1>
+          </div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>Create Account</h2>
+          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
             Join the campus emergency reporting system
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+        <form onSubmit={handleSubmit} className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+            <div className="alert-error">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="displayName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="displayName" className="label">
               Full Name
             </label>
             <input
@@ -96,13 +109,13 @@ export default function RegisterPage() {
               required
               value={formData.displayName}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
               placeholder="John Doe"
             />
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="label">
               Email Address
             </label>
             <input
@@ -112,13 +125,13 @@ export default function RegisterPage() {
               required
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
               placeholder="student@university.edu"
             />
           </div>
 
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="role" className="label">
               Role
             </label>
             <select
@@ -126,21 +139,21 @@ export default function RegisterPage() {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="select"
             >
               <option value="student">Student</option>
               <option value="staff">Staff</option>
               <option value="admin">Admin</option>
               <option value="responder">Responder</option>
             </select>
-            <p className="mt-1 text-xs text-gray-500">
+            <p style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
               Select Admin or Responder to manage campus incidents
             </p>
           </div>
 
           {formData.role === 'student' && (
             <div>
-              <label htmlFor="studentId" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="studentId" className="label">
                 Student ID (Optional)
               </label>
               <input
@@ -149,7 +162,7 @@ export default function RegisterPage() {
                 type="text"
                 value={formData.studentId}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="S123456"
               />
             </div>
@@ -157,7 +170,7 @@ export default function RegisterPage() {
 
           {formData.role === 'staff' && (
             <div>
-              <label htmlFor="department" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="department" className="label">
                 Department (Optional)
               </label>
               <input
@@ -166,14 +179,14 @@ export default function RegisterPage() {
                 type="text"
                 value={formData.department}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="input"
                 placeholder="Computer Science"
               />
             </div>
           )}
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="password" className="label">
               Password
             </label>
             <input
@@ -183,13 +196,13 @@ export default function RegisterPage() {
               required
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
               placeholder="At least 6 characters"
             />
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="confirmPassword" className="label">
               Confirm Password
             </label>
             <input
@@ -199,7 +212,7 @@ export default function RegisterPage() {
               required
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="input"
               placeholder="Re-enter your password"
             />
           </div>
@@ -207,27 +220,41 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mt-6"
+            className="btn btn-primary btn-lg"
+            style={{ width: '100%', marginTop: '0.5rem' }}
           >
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
+          <div style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               Already have an account?{' '}
-              <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+              <Link href="/login" style={{ fontWeight: '500', color: 'var(--primary)', textDecoration: 'none' }} className="link-hover">
                 Sign in here
               </Link>
             </p>
           </div>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-gray-200">
-          <p className="text-xs text-center text-gray-500">
-            🚨 For emergencies, call campus security: <span className="font-semibold">911</span>
-          </p>
+        <div className="card-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+          <div className="alert-error" style={{ display: 'flex', alignItems: 'start', gap: '0.75rem' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '0.125rem' }}>
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <p style={{ fontSize: '0.75rem', margin: 0 }}>
+              For emergencies, call campus security: <span style={{ fontWeight: '600' }}>911</span>
+            </p>
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .link-hover:hover {
+          text-decoration: underline;
+        }
+      `}</style>
     </div>
   );
 }

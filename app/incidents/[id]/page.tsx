@@ -35,26 +35,36 @@ export default function IncidentDetailPage() {
     return () => unsubscribe();
   }, [incidentId]);
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case 'submitted': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'verified': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'assigned': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'in-progress': return 'bg-indigo-100 text-indigo-800 border-indigo-200';
-      case 'resolved': return 'bg-green-100 text-green-800 border-green-200';
-      case 'closed': return 'bg-gray-100 text-gray-800 border-gray-200';
-      case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case 'submitted': return 'badge-warning';
+      case 'verified': return 'badge-primary';
+      case 'assigned': return 'badge-primary';
+      case 'in-progress': return 'badge-primary';
+      case 'resolved': return 'badge-success';
+      case 'closed': return 'badge-success';
+      case 'rejected': return 'badge-danger';
+      default: return 'badge-primary';
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'text-red-600 bg-red-50';
-      case 'high': return 'text-orange-600 bg-orange-50';
-      case 'medium': return 'text-yellow-600 bg-yellow-50';
-      case 'low': return 'text-green-600 bg-green-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case 'critical': return '#dc2626';
+      case 'high': return '#ea580c';
+      case 'medium': return '#ca8a04';
+      case 'low': return '#16a34a';
+      default: return 'var(--text-tertiary)';
+    }
+  };
+
+  const getSeverityBg = (severity: string) => {
+    switch (severity) {
+      case 'critical': return 'var(--danger)';
+      case 'high': return 'var(--warning)';
+      case 'medium': return 'var(--warning)';
+      case 'low': return 'var(--success)';
+      default: return 'var(--bg-tertiary)';
     }
   };
 
@@ -89,12 +99,20 @@ export default function IncidentDetailPage() {
   if (loading) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gray-50">
+        <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-secondary)' }}>
           <Navbar />
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading incident details...</p>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5rem 0' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{
+                width: '3rem',
+                height: '3rem',
+                border: '3px solid var(--border-color)',
+                borderTopColor: 'var(--primary)',
+                borderRadius: '50%',
+                margin: '0 auto 1rem',
+                animation: 'spin 1s linear infinite'
+              }} />
+              <p style={{ color: 'var(--text-secondary)' }}>Loading incident details...</p>
             </div>
           </div>
         </div>
@@ -105,16 +123,24 @@ export default function IncidentDetailPage() {
   if (!incident) {
     return (
       <ProtectedRoute>
-        <div className="min-h-screen bg-gray-50">
+        <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-secondary)' }}>
           <Navbar />
-          <div className="max-w-4xl mx-auto px-4 py-20 text-center">
-            <div className="bg-white rounded-xl shadow-md p-8">
-              <div className="text-6xl mb-4">🔍</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Incident Not Found</h2>
-              <p className="text-gray-600 mb-6">The incident you're looking for doesn't exist or has been removed.</p>
+          <div className="container" style={{ padding: '5rem 1rem', textAlign: 'center' }}>
+            <div className="card" style={{ maxWidth: '48rem', margin: '0 auto', padding: '2rem' }}>
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" style={{ margin: '0 auto 1rem' }}>
+                <circle cx="11" cy="11" r="8" />
+                <path d="m21 21-4.35-4.35" />
+              </svg>
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+                Incident Not Found
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
+                The incident you're looking for doesn't exist or has been removed.
+              </p>
               <button
                 onClick={() => router.push('/dashboard')}
-                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn btn-primary"
+                style={{ padding: '0.75rem 1.5rem' }}
               >
                 Back to Dashboard
               </button>
@@ -127,31 +153,38 @@ export default function IncidentDetailPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+      <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-secondary)' }}>
         <Navbar />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
           {/* Header */}
-          <div className="mb-6">
+          <div style={{ marginBottom: '1.5rem' }}>
             <button
               onClick={() => router.back()}
-              className="text-blue-600 hover:text-blue-700 flex items-center gap-2 mb-4"
+              className="btn btn-ghost btn-sm"
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
               </svg>
               Back
             </button>
           </div>
 
           {/* Main Content */}
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="card" style={{ overflow: 'hidden' }}>
             {/* Header Section */}
-            <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6 text-white">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <h1 className="text-3xl font-bold mb-2">{incident.title}</h1>
-                  <p className="text-blue-100">
+            <div style={{ 
+              background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
+              padding: '2rem',
+              color: 'white'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+                <div style={{ flex: 1, minWidth: '200px' }}>
+                  <h1 style={{ fontSize: '1.875rem', fontWeight: '700', marginBottom: '0.5rem' }}>
+                    {incident.title}
+                  </h1>
+                  <p style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.875rem' }}>
                     Reported by {incident.reporterName} • {
                       incident.createdAt && typeof incident.createdAt === 'object' && 'toDate' in incident.createdAt
                         ? new Date(incident.createdAt.toDate()).toLocaleString()
@@ -159,50 +192,50 @@ export default function IncidentDetailPage() {
                     }
                   </p>
                 </div>
-                <span className={`px-4 py-2 rounded-full text-sm font-semibold border-2 ${getStatusColor(incident.status)}`}>
+                <span className={`badge ${getStatusBadgeClass(incident.status)}`} style={{ fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
                   {incident.status.toUpperCase()}
                 </span>
               </div>
             </div>
 
             {/* Details Grid */}
-            <div className="p-8 grid md:grid-cols-2 gap-6">
+            <div style={{ padding: '2rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
               {/* Category */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Category</h3>
-                <p className="text-lg font-semibold text-gray-900">
+              <div style={{ backgroundColor: 'var(--bg-tertiary)', borderRadius: '0.5rem', padding: '1rem' }}>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>Category</h3>
+                <p style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)' }}>
                   {incident.category.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                 </p>
               </div>
 
               {/* Severity */}
-              <div className={`rounded-lg p-4 ${getSeverityColor(incident.severity)}`}>
-                <h3 className="text-sm font-medium mb-1">Severity</h3>
-                <p className="text-lg font-semibold">
+              <div style={{ borderRadius: '0.5rem', padding: '1rem', backgroundColor: getSeverityBg(incident.severity), color: 'white' }}>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.25rem' }}>Severity</h3>
+                <p style={{ fontSize: '1.125rem', fontWeight: '600' }}>
                   {incident.severity.toUpperCase()}
                 </p>
               </div>
 
               {/* Location */}
-              <div className="md:col-span-2 bg-gray-50 rounded-lg p-4">
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Location</h3>
-                <div className="space-y-1">
-                  <p className="text-gray-900">
-                    <span className="font-semibold">Building:</span> {incident.location.building}
+              <div style={{ gridColumn: '1 / -1', backgroundColor: 'var(--bg-tertiary)', borderRadius: '0.5rem', padding: '1rem' }}>
+                <h3 style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-tertiary)', marginBottom: '0.5rem' }}>Location</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                  <p style={{ color: 'var(--text-primary)' }}>
+                    <span style={{ fontWeight: '600' }}>Building:</span> {incident.location.building}
                   </p>
                   {incident.location.floor && (
-                    <p className="text-gray-900">
-                      <span className="font-semibold">Floor:</span> {incident.location.floor}
+                    <p style={{ color: 'var(--text-primary)' }}>
+                      <span style={{ fontWeight: '600' }}>Floor:</span> {incident.location.floor}
                     </p>
                   )}
                   {incident.location.room && (
-                    <p className="text-gray-900">
-                      <span className="font-semibold">Room:</span> {incident.location.room}
+                    <p style={{ color: 'var(--text-primary)' }}>
+                      <span style={{ fontWeight: '600' }}>Room:</span> {incident.location.room}
                     </p>
                   )}
                   {incident.location.description && (
-                    <p className="text-gray-900">
-                      <span className="font-semibold">Details:</span> {incident.location.description}
+                    <p style={{ color: 'var(--text-primary)' }}>
+                      <span style={{ fontWeight: '600' }}>Details:</span> {incident.location.description}
                     </p>
                   )}
                 </div>
@@ -210,28 +243,29 @@ export default function IncidentDetailPage() {
             </div>
 
             {/* Description */}
-            <div className="px-8 pb-8">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{incident.description}</p>
+            <div style={{ padding: '0 2rem 2rem' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.75rem' }}>Description</h3>
+              <p style={{ color: 'var(--text-secondary)', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>{incident.description}</p>
             </div>
 
             {/* Images */}
             {incident.imageUrls && incident.imageUrls.length > 0 && (
-              <div className="px-8 pb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Images</h3>
-                <div className="grid md:grid-cols-3 gap-4">
+              <div style={{ padding: '0 2rem 2rem' }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.75rem' }}>Images</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                   {incident.imageUrls.map((url, index) => (
                     <a
                       key={index}
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block"
+                      style={{ display: 'block' }}
                     >
                       <img
                         src={url}
                         alt={`Incident image ${index + 1}`}
-                        className="w-full h-48 object-cover rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+                        style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '0.5rem', cursor: 'pointer', transition: 'opacity 0.2s ease' }}
+                        className="incident-image"
                       />
                     </a>
                   ))}
@@ -241,23 +275,23 @@ export default function IncidentDetailPage() {
 
             {/* Status Timeline */}
             {incident.statusHistory && (
-              <div className="px-8 pb-8 border-t border-gray-200 pt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Status History</h3>
-                <div className="space-y-4">
+              <div style={{ padding: '2rem', borderTop: '1px solid var(--border-color)' }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Status History</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {Object.entries(incident.statusHistory).map(([status, history]) => (
-                    <div key={status} className="flex items-start gap-4">
-                      <div className={`w-3 h-3 rounded-full mt-1.5 ${getStatusColor(status).split(' ')[0]}`}></div>
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900">
+                    <div key={status} style={{ display: 'flex', alignItems: 'start', gap: '1rem' }}>
+                      <div style={{ width: '0.75rem', height: '0.75rem', borderRadius: '50%', marginTop: '0.375rem', flexShrink: 0 }} className={`badge ${getStatusBadgeClass(status)}`}></div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
                           {status.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
                         </p>
-                        <p className="text-sm text-gray-600">
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                           {history.timestamp && typeof history.timestamp === 'object' && 'toDate' in history.timestamp
                             ? new Date(history.timestamp.toDate()).toLocaleString()
                             : 'N/A'}
                         </p>
                         {history.notes && (
-                          <p className="text-sm text-gray-600 mt-1">{history.notes}</p>
+                          <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{history.notes}</p>
                         )}
                       </div>
                     </div>
@@ -268,27 +302,27 @@ export default function IncidentDetailPage() {
 
             {/* Admin Actions */}
             {userProfile && ['admin', 'responder'].includes(userProfile.role) && (
-              <div className="px-8 pb-8 border-t border-gray-200 pt-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Admin Actions</h3>
-                <div className="flex flex-wrap gap-3">
+              <div style={{ padding: '0 2rem 2rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '1rem' }}>Admin Actions</h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
                   {incident.status === 'submitted' && (
                     <button
                       onClick={() => openActionModal('verify')}
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="btn btn-success"
                     >
                       Verify Incident
                     </button>
                   )}
                   <button
                     onClick={() => openActionModal('status')}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                    className="btn btn-primary"
                   >
                     Update Status
                   </button>
                   {incident.status !== 'rejected' && incident.status !== 'closed' && (
                     <button
                       onClick={() => openActionModal('reject')}
-                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                      className="btn btn-danger"
                     >
                       Reject
                     </button>
@@ -301,22 +335,33 @@ export default function IncidentDetailPage() {
 
         {/* Action Modal */}
         {showActionModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">
-                {actionType === 'verify' && 'Verify Incident'}
-                {actionType === 'reject' && 'Reject Incident'}
-                {actionType === 'status' && 'Update Status'}
-              </h3>
+          <div style={{ 
+            position: 'fixed', 
+            inset: 0, 
+            backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            zIndex: 1001,
+            padding: '1rem'
+          }}>
+            <div className="card" style={{ maxWidth: '28rem', width: '100%' }}>
+              <div className="card-header">
+                <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+                  {actionType === 'verify' && 'Verify Incident'}
+                  {actionType === 'reject' && 'Reject Incident'}
+                  {actionType === 'status' && 'Update Status'}
+                </h3>
+              </div>
 
-              <div className="mb-4">
+              <div className="card-body">
                 {actionType === 'status' && (
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">New Status</label>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label className="label">New Status</label>
                     <select
                       value={actionStatus}
                       onChange={(e) => setActionStatus(e.target.value as IncidentStatus)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="select"
                     >
                       <option value="verified">Verified</option>
                       <option value="assigned">Assigned</option>
@@ -327,14 +372,14 @@ export default function IncidentDetailPage() {
                   </div>
                 )}
 
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="label">
                   Notes {actionType === 'reject' ? '(Required)' : '(Optional)'}
                 </label>
                 <textarea
                   value={actionNotes}
                   onChange={(e) => setActionNotes(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="textarea"
                   placeholder={
                     actionType === 'verify'
                       ? 'Add verification notes...'
@@ -345,11 +390,12 @@ export default function IncidentDetailPage() {
                 />
               </div>
 
-              <div className="flex gap-3">
+              <div className="card-footer" style={{ display: 'flex', gap: '0.75rem' }}>
                 <button
                   onClick={handleAction}
                   disabled={actionLoading || (actionType === 'reject' && !actionNotes)}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn btn-primary"
+                  style={{ flex: 1 }}
                 >
                   {actionLoading ? 'Processing...' : 'Confirm'}
                 </button>
@@ -359,7 +405,7 @@ export default function IncidentDetailPage() {
                     setActionNotes('');
                   }}
                   disabled={actionLoading}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="btn btn-outline"
                 >
                   Cancel
                 </button>
@@ -367,6 +413,15 @@ export default function IncidentDetailPage() {
             </div>
           </div>
         )}
+
+        <style jsx>{`
+          @keyframes spin {
+            to { transform: rotate(360deg); }
+          }
+          .incident-image:hover {
+            opacity: 0.9;
+          }
+        `}</style>
       </div>
     </ProtectedRoute>
   );

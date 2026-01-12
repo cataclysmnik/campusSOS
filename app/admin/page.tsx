@@ -78,26 +78,26 @@ export default function AdminPage() {
     critical: incidents.filter((i) => i.severity === 'critical').length,
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusBadgeClass = (status: string) => {
     switch (status) {
-      case 'submitted': return 'bg-yellow-100 text-yellow-800';
-      case 'verified': return 'bg-blue-100 text-blue-800';
-      case 'assigned': return 'bg-purple-100 text-purple-800';
-      case 'in-progress': return 'bg-indigo-100 text-indigo-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'submitted': return 'badge-warning';
+      case 'verified': return 'badge-primary';
+      case 'assigned': return 'badge-primary';
+      case 'in-progress': return 'badge-primary';
+      case 'resolved': return 'badge-success';
+      case 'closed': return 'badge-success';
+      case 'rejected': return 'badge-danger';
+      default: return 'badge-primary';
     }
   };
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'text-red-600';
-      case 'high': return 'text-orange-600';
-      case 'medium': return 'text-yellow-600';
-      case 'low': return 'text-green-600';
-      default: return 'text-gray-600';
+      case 'critical': return '#dc2626';
+      case 'high': return '#ea580c';
+      case 'medium': return '#ca8a04';
+      case 'low': return '#16a34a';
+      default: return 'var(--text-tertiary)';
     }
   };
 
@@ -131,173 +131,198 @@ export default function AdminPage() {
   return (
     <ProtectedRoute>
       <RoleGuard allowedRoles={['admin', 'responder']}>
-        <div className="min-h-screen bg-gray-50">
+        <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-secondary)' }}>
           <Navbar />
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
-              <p className="text-gray-600">Manage and monitor all campus incidents</p>
+            <div style={{ marginBottom: '2rem' }}>
+              <h1 style={{ fontSize: '1.875rem', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '0.5rem' }}>
+                Admin Dashboard
+              </h1>
+              <p style={{ color: 'var(--text-secondary)' }}>
+                Manage and monitor all campus incidents
+              </p>
             </div>
 
             {/* Statistics Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
-              <div className="bg-white rounded-lg shadow p-4">
-                <p className="text-sm text-gray-600 mb-1">Total</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+              gap: '1rem',
+              marginBottom: '2rem'
+            }}>
+              <div className="card" style={{ padding: '1.25rem' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Total</p>
+                <p style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--text-primary)' }}>{stats.total}</p>
               </div>
-              <div className="bg-yellow-50 rounded-lg shadow p-4">
-                <p className="text-sm text-yellow-700 mb-1">Submitted</p>
-                <p className="text-2xl font-bold text-yellow-800">{stats.submitted}</p>
+              <div className="card" style={{ padding: '1.25rem', borderLeft: '3px solid var(--warning)' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Submitted</p>
+                <p style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--warning)' }}>{stats.submitted}</p>
               </div>
-              <div className="bg-blue-50 rounded-lg shadow p-4">
-                <p className="text-sm text-blue-700 mb-1">Verified</p>
-                <p className="text-2xl font-bold text-blue-800">{stats.verified}</p>
+              <div className="card" style={{ padding: '1.25rem', borderLeft: '3px solid var(--primary)' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Verified</p>
+                <p style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--primary)' }}>{stats.verified}</p>
               </div>
-              <div className="bg-purple-50 rounded-lg shadow p-4">
-                <p className="text-sm text-purple-700 mb-1">Assigned</p>
-                <p className="text-2xl font-bold text-purple-800">{stats.assigned}</p>
+              <div className="card" style={{ padding: '1.25rem', borderLeft: '3px solid var(--primary)' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Assigned</p>
+                <p style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--primary)' }}>{stats.assigned}</p>
               </div>
-              <div className="bg-indigo-50 rounded-lg shadow p-4">
-                <p className="text-sm text-indigo-700 mb-1">In Progress</p>
-                <p className="text-2xl font-bold text-indigo-800">{stats.inProgress}</p>
+              <div className="card" style={{ padding: '1.25rem', borderLeft: '3px solid var(--primary)' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>In Progress</p>
+                <p style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--primary)' }}>{stats.inProgress}</p>
               </div>
-              <div className="bg-green-50 rounded-lg shadow p-4">
-                <p className="text-sm text-green-700 mb-1">Resolved</p>
-                <p className="text-2xl font-bold text-green-800">{stats.resolved}</p>
+              <div className="card" style={{ padding: '1.25rem', borderLeft: '3px solid var(--success)' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Resolved</p>
+                <p style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--success)' }}>{stats.resolved}</p>
               </div>
-              <div className="bg-red-50 rounded-lg shadow p-4">
-                <p className="text-sm text-red-700 mb-1">Critical</p>
-                <p className="text-2xl font-bold text-red-800">{stats.critical}</p>
+              <div className="card" style={{ padding: '1.25rem', borderLeft: '3px solid var(--danger)' }}>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>Critical</p>
+                <p style={{ fontSize: '2rem', fontWeight: '700', color: 'var(--danger)' }}>{stats.critical}</p>
               </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-              <div className="grid md:grid-cols-4 gap-4">
-                {/* Search */}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                  <input
-                    type="text"
-                    placeholder="Search by title, description, or location..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+            <div className="card" style={{ marginBottom: '1.5rem' }}>
+              <div className="card-body">
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                  {/* Search */}
+                  <div style={{ gridColumn: 'span 2' }}>
+                    <label className="label">Search</label>
+                    <input
+                      type="text"
+                      placeholder="Search by title, description, or location..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="input"
+                    />
+                  </div>
+
+                  {/* Status Filter */}
+                  <div>
+                    <label className="label">Status</label>
+                    <select
+                      value={statusFilter}
+                      onChange={(e) => setStatusFilter(e.target.value as IncidentStatus | 'all')}
+                      className="select"
+                    >
+                      <option value="all">All Statuses</option>
+                      <option value="submitted">Submitted</option>
+                      <option value="verified">Verified</option>
+                      <option value="assigned">Assigned</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                      <option value="rejected">Rejected</option>
+                    </select>
+                  </div>
+
+                  {/* Severity Filter */}
+                  <div>
+                    <label className="label">Severity</label>
+                    <select
+                      value={severityFilter}
+                      onChange={(e) => setSeverityFilter(e.target.value as SeverityLevel | 'all')}
+                      className="select"
+                    >
+                      <option value="all">All Levels</option>
+                      <option value="critical">Critical</option>
+                      <option value="high">High</option>
+                      <option value="medium">Medium</option>
+                      <option value="low">Low</option>
+                    </select>
+                  </div>
                 </div>
 
-                {/* Status Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                  <select
-                    value={statusFilter}
-                    onChange={(e) => setStatusFilter(e.target.value as IncidentStatus | 'all')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                {/* Clear Filters */}
+                {(searchQuery || statusFilter !== 'all' || categoryFilter !== 'all' || severityFilter !== 'all') && (
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setStatusFilter('all');
+                      setCategoryFilter('all');
+                      setSeverityFilter('all');
+                    }}
+                    className="btn btn-ghost btn-sm"
+                    style={{ marginTop: '1rem' }}
                   >
-                    <option value="all">All Statuses</option>
-                    <option value="submitted">Submitted</option>
-                    <option value="verified">Verified</option>
-                    <option value="assigned">Assigned</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                    <option value="rejected">Rejected</option>
-                  </select>
-                </div>
-
-                {/* Severity Filter */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Severity</label>
-                  <select
-                    value={severityFilter}
-                    onChange={(e) => setSeverityFilter(e.target.value as SeverityLevel | 'all')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">All Levels</option>
-                    <option value="critical">Critical</option>
-                    <option value="high">High</option>
-                    <option value="medium">Medium</option>
-                    <option value="low">Low</option>
-                  </select>
-                </div>
+                    Clear all filters
+                  </button>
+                )}
               </div>
-
-              {/* Clear Filters */}
-              {(searchQuery || statusFilter !== 'all' || categoryFilter !== 'all' || severityFilter !== 'all') && (
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setStatusFilter('all');
-                    setCategoryFilter('all');
-                    setSeverityFilter('all');
-                  }}
-                  className="mt-4 text-sm text-blue-600 hover:text-blue-700"
-                >
-                  Clear all filters
-                </button>
-              )}
             </div>
 
             {/* Incidents List */}
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <div className="px-6 py-4 border-b border-gray-200">
-                <h2 className="text-xl font-semibold text-gray-900">
+            <div className="card">
+              <div className="card-header">
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: 'var(--text-primary)' }}>
                   Incidents ({filteredIncidents.length})
                 </h2>
               </div>
 
               {loading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-4 text-gray-600">Loading incidents...</p>
+                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                  <div style={{
+                    width: '3rem',
+                    height: '3rem',
+                    border: '3px solid var(--border-color)',
+                    borderTopColor: 'var(--primary)',
+                    borderRadius: '50%',
+                    margin: '0 auto 1rem',
+                    animation: 'spin 1s linear infinite'
+                  }} />
+                  <p style={{ color: 'var(--text-secondary)' }}>Loading incidents...</p>
                 </div>
               ) : filteredIncidents.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📋</div>
-                  <p className="text-gray-600">No incidents found matching your filters</p>
+                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" strokeWidth="2" style={{ margin: '0 auto 1rem' }}>
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                    <polyline points="10 9 9 9 8 9" />
+                  </svg>
+                  <p style={{ color: 'var(--text-secondary)' }}>No incidents found matching your filters</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <div style={{ overflowX: 'auto' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead style={{ backgroundColor: 'var(--bg-secondary)' }}>
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th style={{ padding: '0.75rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Incident
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th style={{ padding: '0.75rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Location
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th style={{ padding: '0.75rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Severity
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th style={{ padding: '0.75rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Status
                         </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th style={{ padding: '0.75rem 1.5rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Date
                         </th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        <th style={{ padding: '0.75rem 1.5rem', textAlign: 'right', fontSize: '0.75rem', fontWeight: '500', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                           Actions
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody style={{ backgroundColor: 'var(--bg-primary)' }}>
                       {filteredIncidents.map((incident) => (
-                        <tr key={incident.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              {/* Thumbnail if images exist */}
+                        <tr key={incident.id} style={{ borderTop: '1px solid var(--border-color)' }} className="table-row">
+                          <td style={{ padding: '1rem 1.5rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                               {incident.imageUrls && incident.imageUrls.length > 0 && (
-                                <div className="flex-shrink-0">
+                                <div style={{ flexShrink: 0 }}>
                                   <img
                                     src={incident.imageUrls[0]}
                                     alt="Incident"
-                                    className="h-12 w-12 rounded-lg object-cover"
+                                    style={{ height: '3rem', width: '3rem', borderRadius: '0.5rem', objectFit: 'cover' }}
                                   />
                                   {incident.imageUrls.length > 1 && (
-                                    <span className="text-xs text-gray-500 mt-1 block text-center">
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem', display: 'block', textAlign: 'center' }}>
                                       +{incident.imageUrls.length - 1}
                                     </span>
                                   )}
@@ -305,53 +330,54 @@ export default function AdminPage() {
                               )}
                               <div>
                                 <div 
-                                  className="text-sm font-medium text-blue-600 hover:text-blue-700 cursor-pointer"
+                                  style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--primary)', cursor: 'pointer' }}
                                   onClick={() => router.push(`/incidents/${incident.id}`)}
+                                  className="incident-link"
                                 >
                                   {incident.title}
                                 </div>
-                                <div className="text-sm text-gray-500">{incident.reporterName}</div>
+                                <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{incident.reporterName}</div>
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{incident.location.building}</div>
-                            <div className="text-sm text-gray-500">{incident.location.room}</div>
+                          <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>{incident.location.building}</div>
+                            <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{incident.location.room}</div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`text-sm font-semibold ${getSeverityColor(incident.severity)}`}>
+                          <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                            <span style={{ fontSize: '0.875rem', fontWeight: '600', color: getSeverityColor(incident.severity) }}>
                               {incident.severity.toUpperCase()}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(incident.status)}`}>
+                          <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap' }}>
+                            <span className={`badge ${getStatusBadgeClass(incident.status)}`}>
                               {incident.status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                             {incident.createdAt && typeof incident.createdAt === 'object' && 'toDate' in incident.createdAt
                               ? new Date(incident.createdAt.toDate()).toLocaleDateString()
                               : 'N/A'}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div className="flex justify-end gap-2">
+                          <td style={{ padding: '1rem 1.5rem', whiteSpace: 'nowrap', textAlign: 'right' }}>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
                               {incident.status === 'submitted' && (
                                 <button
                                   onClick={() => openActionModal(incident, 'verify')}
-                                  className="text-green-600 hover:text-green-900"
+                                  className="btn btn-sm btn-success"
                                 >
                                   Verify
                                 </button>
                               )}
                               <button
                                 onClick={() => openActionModal(incident, 'status')}
-                                className="text-blue-600 hover:text-blue-900"
+                                className="btn btn-sm btn-outline"
                               >
                                 Update
                               </button>
                               <button
                                 onClick={() => router.push(`/incidents/${incident.id}`)}
-                                className="text-gray-600 hover:text-gray-900"
+                                className="btn btn-sm btn-ghost"
                               >
                                 View
                               </button>
@@ -368,24 +394,37 @@ export default function AdminPage() {
 
           {/* Action Modal */}
           {showActionModal && selectedIncident && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-              <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
-                  {actionType === 'verify' && 'Verify Incident'}
-                  {actionType === 'reject' && 'Reject Incident'}
-                  {actionType === 'status' && 'Update Status'}
-                </h3>
+            <div style={{ 
+              position: 'fixed', 
+              inset: 0, 
+              backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              zIndex: 1001,
+              padding: '1rem'
+            }}>
+              <div className="card" style={{ maxWidth: '28rem', width: '100%' }}>
+                <div className="card-header">
+                  <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+                    {actionType === 'verify' && 'Verify Incident'}
+                    {actionType === 'reject' && 'Reject Incident'}
+                    {actionType === 'status' && 'Update Status'}
+                  </h3>
+                </div>
 
-                <div className="mb-4">
-                  <p className="text-sm text-gray-600 mb-2">Incident: {selectedIncident.title}</p>
+                <div className="card-body">
+                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+                    Incident: {selectedIncident.title}
+                  </p>
                   
                   {actionType === 'status' && (
-                    <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">New Status</label>
+                    <div style={{ marginBottom: '1rem' }}>
+                      <label className="label">New Status</label>
                       <select
                         value={actionStatus}
                         onChange={(e) => setActionStatus(e.target.value as IncidentStatus)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="select"
                       >
                         <option value="verified">Verified</option>
                         <option value="assigned">Assigned</option>
@@ -396,20 +435,21 @@ export default function AdminPage() {
                     </div>
                   )}
 
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                  <label className="label">Notes (Optional)</label>
                   <textarea
                     value={actionNotes}
                     onChange={(e) => setActionNotes(e.target.value)}
                     rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="textarea"
                     placeholder="Add any additional notes..."
                   />
                 </div>
 
-                <div className="flex gap-3">
+                <div className="card-footer" style={{ display: 'flex', gap: '0.75rem' }}>
                   <button
                     onClick={handleAction}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="btn btn-primary"
+                    style={{ flex: 1 }}
                   >
                     Confirm
                   </button>
@@ -419,7 +459,7 @@ export default function AdminPage() {
                       setActionNotes('');
                       setSelectedIncident(null);
                     }}
-                    className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="btn btn-outline"
                   >
                     Cancel
                   </button>
@@ -427,6 +467,18 @@ export default function AdminPage() {
               </div>
             </div>
           )}
+
+          <style jsx>{`
+            @keyframes spin {
+              to { transform: rotate(360deg); }
+            }
+            .table-row:hover {
+              background-color: var(--bg-secondary);
+            }
+            .incident-link:hover {
+              text-decoration: underline;
+            }
+          `}</style>
         </div>
       </RoleGuard>
     </ProtectedRoute>

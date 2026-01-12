@@ -57,6 +57,7 @@ export default function LoginPage() {
       alignItems: 'center', 
       justifyContent: 'center',
       padding: '1rem',
+      marginTop: '-6.5rem',
       background: 'linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)'
     }}>
       <div className="card" style={{ width: '100%', maxWidth: '28rem' }}>
