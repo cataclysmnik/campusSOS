@@ -63,7 +63,7 @@ export default function ProfilePage() {
               <div>
                 <label className="label">Phone</label>
                 <p style={{ fontSize: '1.125rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                  {userProfile?.phone || 'Not provided'}
+                  {userProfile?.phoneNumber || 'Not provided'}
                 </p>
               </div>
               
