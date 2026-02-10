@@ -12,8 +12,9 @@ export default function Home() {
 
   const handleCategoryClick = (category: string) => {
     if (!user) {
-      // Not logged in - redirect to login
-      router.push('/login');
+      // Not logged in - redirect to login with redirect URL encoded
+      const redirectUrl = `/incidents/new?category=${category}`;
+      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
       return;
     }
     // Logged in - go to incident form with category pre-selected
