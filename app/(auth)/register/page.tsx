@@ -29,6 +29,24 @@ export default function RegisterPage() {
     setError('');
 
     // Validation
+    if (!formData.email.endsWith('@vitstudent.ac.in')) {
+      setError('Email must end with @vitstudent.ac.in');
+      return;
+    }
+
+    if (formData.role === 'student') {
+      if (!formData.studentId) {
+        setError('Student ID is required for students');
+        return;
+      }
+      // Pattern: 2 digits + 3 uppercase letters + 4 digits (e.g., 24BRS1242)
+      const studentIdPattern = /^\d{2}[A-Z]{3}\d{4}$/;
+      if (!studentIdPattern.test(formData.studentId)) {
+        setError('Student ID must be in format: 2 digits + 3 uppercase letters + 4 digits (e.g., 24BRS1242)');
+        return;
+      }
+    }
+
     if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -128,8 +146,11 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={handleChange}
               className="input"
-              placeholder="student@university.edu"
+              placeholder="yourname@vitstudent.ac.in"
             />
+            <p style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+              Must end with @vitstudent.ac.in
+            </p>
           </div>
 
           <div>
@@ -156,16 +177,19 @@ export default function RegisterPage() {
           {formData.role === 'student' && (
             <div>
               <label htmlFor="studentId" className="label">
-                Student ID (Optional)
+                Student ID <span style={{ color: 'var(--danger)' }}>*</span>
               </label>
               <input
                 id="studentId"
                 name="studentId"
                 type="text"
+                required
                 value={formData.studentId}
                 onChange={handleChange}
                 className="input"
-                placeholder="S123456"
+                placeholder="24BCE1000"
+                maxLength={9}
+                style={{ textTransform: 'uppercase' }}
               />
             </div>
           )}
@@ -294,28 +318,19 @@ export default function RegisterPage() {
             {loading ? 'Creating Account...' : 'Create Account'}
           </button>
 
-          <div style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
               Already have an account?{' '}
               <Link href="/login" style={{ fontWeight: '500', color: 'var(--primary)', textDecoration: 'none' }} className="link-hover">
                 Sign in here
               </Link>
             </p>
+            <Link href="/" style={{ fontSize: '0.875rem', fontWeight: '500', color: 'var(--text-tertiary)', textDecoration: 'none' }} className="link-hover">
+              ← Back to Home
+            </Link>
           </div>
         </form>
 
-        {/* <div className="card-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-          <div className="alert-error" style={{ display: 'flex', alignItems: 'start', gap: '0.75rem' }}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '0.125rem' }}>
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
-            </svg>
-            <p style={{ fontSize: '0.75rem', margin: 0 }}>
-              For emergencies, call campus security: <span style={{ fontWeight: '600' }}>911</span>
-            </p>
-          </div>
-        </div> */}
       </div>
 
       <style jsx>{`
