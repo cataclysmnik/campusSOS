@@ -304,7 +304,7 @@ export default function RegisterPage() {
           </div>
         </form>
 
-        <div className="card-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+        {/* <div className="card-footer" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
           <div className="alert-error" style={{ display: 'flex', alignItems: 'start', gap: '0.75rem' }}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '0.125rem' }}>
               <circle cx="12" cy="12" r="10" />
@@ -315,7 +315,7 @@ export default function RegisterPage() {
               For emergencies, call campus security: <span style={{ fontWeight: '600' }}>911</span>
             </p>
           </div>
-        </div>
+        </div> */}
       </div>
 
       <style jsx>{`
