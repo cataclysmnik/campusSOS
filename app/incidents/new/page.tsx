@@ -109,7 +109,7 @@ export default function NewIncidentPage() {
     e.preventDefault();
     setError('');
 
-    if (!user || !userProfile) {
+    if (!user) {
       setError('You must be logged in to report an incident');
       return;
     }
@@ -131,8 +131,8 @@ export default function NewIncidentPage() {
       // Create incident data
       const incidentData = {
         reportedBy: user.uid,
-        reporterName: formData.isAnonymous ? 'Anonymous' : userProfile.displayName,
-        reporterEmail: formData.isAnonymous ? 'anonymous@campus.edu' : userProfile.email,
+        reporterName: formData.isAnonymous ? 'Anonymous' : (userProfile?.displayName || user.displayName || 'User'),
+        reporterEmail: formData.isAnonymous ? 'anonymous@campus.edu' : (userProfile?.email || user.email || ''),
         category: formData.category,
         title: formData.title,
         description: formData.description,
