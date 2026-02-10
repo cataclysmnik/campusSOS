@@ -364,6 +364,10 @@ body {
   background-color: rgba(10, 10, 10, 0.8) !important;
 }
 
+.dark .mobile-menu {
+  background-color: rgba(10, 10, 10, 0.98) !important;
+}
+
 .avatar-button:hover {
   transform: scale(1.05);
 }
@@ -379,13 +383,39 @@ body {
   .user-details {
     display: flex !important;
   }
+  .mobile-menu-btn {
+    display: none !important;
+  }
+  .mobile-menu {
+    display: none !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .desktop-nav {
+    display: none !important;
+  }
+  .desktop-user-menu {
+    display: none !important;
+  }
+  .mobile-menu-btn {
+    display: block !important;
+  }
+  .logo-text {
+    font-size: 1.25rem !important;
+  }
+  .navbar-float {
+    width: calc(100% - 1rem) !important;
+    top: 0.5rem !important;
+  }
+  .navbar-float > div {
+    padding: 0 1rem !important;
+    height: 3.5rem !important;
+  }
 }
 
 @media (max-width: 640px) {
   .logout-text {
     display: none;
-  }
-  .user-info {
-    display: none !important;
   }
 }

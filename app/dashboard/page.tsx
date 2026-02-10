@@ -92,13 +92,14 @@ export default function DashboardPage() {
             gap: '1.5rem',
             marginBottom: '2rem'
           }}>
-            <Link href="/incidents/new" style={{ textDecoration: 'none' }}>
+            <Link href="/incidents/new" style={{ textDecoration: 'none', height: '100%' }}>
               <div className="card" style={{ 
                 background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
                 cursor: 'pointer',
-                transition: 'transform 0.2s ease'
+                transition: 'transform 0.2s ease',
+                height: '100%'
               }}>
-                <div className="card-body">
+                <div className="card-body" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" style={{ marginBottom: '0.75rem' }}>
                     <circle cx="12" cy="12" r="10" />
                     <line x1="12" y1="8" x2="12" y2="12" />

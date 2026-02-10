@@ -38,9 +38,11 @@ export default function ProfilePage() {
             
             <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <div>
-                <label className="label">Email</label>
+                <label className="label">
+                  {userProfile?.role === 'student' ? 'Registration Number' : 'Email'}
+                </label>
                 <p style={{ fontSize: '1.125rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                  {user?.email}
+                  {userProfile?.role === 'student' && userProfile?.studentId ? userProfile.studentId : user?.email}
                 </p>
               </div>
               
@@ -66,13 +68,15 @@ export default function ProfilePage() {
                   {userProfile?.phoneNumber || 'Not provided'}
                 </p>
               </div>
-              
-              <div>
-                <label className="label">Student/Staff ID</label>
-                <p style={{ fontSize: '1.125rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
-                  {userProfile?.studentId || 'Not provided'}
-                </p>
-              </div>
+
+              {(userProfile?.role === 'staff' || userProfile?.role === 'admin' || userProfile?.role === 'responder') && (
+                <div>
+                  <label className="label">Email</label>
+                  <p style={{ fontSize: '1.125rem', color: 'var(--text-primary)', marginTop: '0.25rem' }}>
+                    {user?.email}
+                  </p>
+                </div>
+              )}
 
               {userProfile?.role === 'student' || userProfile?.role === 'staff' ? (
                 <div className="alert-warning" style={{ marginTop: '1rem' }}>
