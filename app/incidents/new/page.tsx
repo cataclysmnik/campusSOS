@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,8 +9,9 @@ import { createIncident } from '@/lib/firebase/firestore';
 import { uploadIncidentImages } from '@/lib/firebase/storage';
 import { IncidentCategory, SeverityLevel, Location } from '@/types/firebase';
 
-export default function NewIncidentPage() {
+function NewIncidentPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user, userProfile } = useAuth();
 
   const [formData, setFormData] = useState({
@@ -26,6 +27,17 @@ export default function NewIncidentPage() {
       description: '',
     } as Location,
   });
+
+  // Check for category from URL params
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setFormData(prev => ({
+        ...prev,
+        category: categoryParam as IncidentCategory
+      }));
+    }
+  }, [searchParams]);
 
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -475,5 +487,13 @@ export default function NewIncidentPage() {
         `}</style>
       </div>
     </ProtectedRoute>
+  );
+}
+
+export default function NewIncidentPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NewIncidentPageContent />
+    </Suspense>
   );
 }

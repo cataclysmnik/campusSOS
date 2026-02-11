@@ -2,9 +2,24 @@
 
 import Link from 'next/link';
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const handleCategoryClick = (category: string) => {
+    if (!user) {
+      // Not logged in - redirect to login with redirect URL encoded
+      const redirectUrl = `/incidents/new?category=${category}`;
+      router.push(`/login?redirect=${encodeURIComponent(redirectUrl)}`);
+      return;
+    }
+    // Logged in - go to incident form with category pre-selected
+    router.push(`/incidents/new?category=${category}`);
+  };
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -401,7 +416,9 @@ export default function Home() {
                 flexShrink: 0,
                 scrollSnapAlign: 'start',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
-              }} onMouseEnter={(e) => {
+              }} 
+              onClick={() => handleCategoryClick('medical-emergency')}
+              onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px) scale(1.05)';
                 e.currentTarget.style.boxShadow = '0 12px 24px rgba(220, 38, 38, 0.15)';
               }} onMouseLeave={(e) => {
@@ -439,7 +456,9 @@ export default function Home() {
                 flexShrink: 0,
                 scrollSnapAlign: 'start',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
-              }} onMouseEnter={(e) => {
+              }} 
+              onClick={() => handleCategoryClick('fire')}
+              onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px) scale(1.05)';
                 e.currentTarget.style.boxShadow = '0 12px 24px rgba(234, 88, 12, 0.15)';
               }} onMouseLeave={(e) => {
@@ -477,7 +496,9 @@ export default function Home() {
                 flexShrink: 0,
                 scrollSnapAlign: 'start',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
-              }} onMouseEnter={(e) => {
+              }} 
+              onClick={() => handleCategoryClick('security-concern')}
+              onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px) scale(1.05)';
                 e.currentTarget.style.boxShadow = '0 12px 24px rgba(220, 38, 38, 0.15)';
               }} onMouseLeave={(e) => {
@@ -516,7 +537,9 @@ export default function Home() {
                 flexShrink: 0,
                 scrollSnapAlign: 'start',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
-              }} onMouseEnter={(e) => {
+              }} 
+              onClick={() => handleCategoryClick('facility-issue')}
+              onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px) scale(1.05)';
                 e.currentTarget.style.boxShadow = '0 12px 24px rgba(37, 99, 235, 0.15)';
               }} onMouseLeave={(e) => {
@@ -554,7 +577,9 @@ export default function Home() {
                 flexShrink: 0,
                 scrollSnapAlign: 'start',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
-              }} onMouseEnter={(e) => {
+              }} 
+              onClick={() => handleCategoryClick('harassment')}
+              onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px) scale(1.05)';
                 e.currentTarget.style.boxShadow = '0 12px 24px rgba(220, 38, 38, 0.15)';
               }} onMouseLeave={(e) => {
@@ -594,7 +619,9 @@ export default function Home() {
                 flexShrink: 0,
                 scrollSnapAlign: 'start',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.06)'
-              }} onMouseEnter={(e) => {
+              }} 
+              onClick={() => handleCategoryClick('lost-item')}
+              onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-8px) scale(1.05)';
                 e.currentTarget.style.boxShadow = '0 12px 24px rgba(37, 99, 235, 0.15)';
               }} onMouseLeave={(e) => {
