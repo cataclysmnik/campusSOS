@@ -1,49 +1,46 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
 import { createIncident } from '@/lib/firebase/firestore';
-import { uploadIncidentImages } from '@/lib/firebase/storage';
 import { IncidentCategory, SeverityLevel, Location } from '@/types/firebase';
+import { uploadIncidentImages } from '@/lib/firebase/storage';
 
 function NewIncidentPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, userProfile } = useAuth();
 
-  const [formData, setFormData] = useState({
-    category: '' as IncidentCategory | '',
-    title: '',
-    description: '',
-    severity: 'medium' as SeverityLevel,
-    isAnonymous: false,
-    location: {
-      building: '',
-      floor: '',
-      room: '',
-      description: '',
-    } as Location,
-  });
-
-  // Check for category from URL params
-  useEffect(() => {
+  const [formData, setFormData] = useState(() => {
     const categoryParam = searchParams.get('category');
-    if (categoryParam) {
-      setFormData(prev => ({
-        ...prev,
-        category: categoryParam as IncidentCategory
-      }));
-    }
-  }, [searchParams]);
-
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    return {
+      category: (categoryParam as IncidentCategory) || ('' as IncidentCategory | ''),
+      title: '',
+      description: '',
+      severity: 'medium' as SeverityLevel,
+      isAnonymous: false,
+      location: {
+        building: '',
+        floor: '',
+        room: '',
+        description: '',
+      } as Location,
+    };
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const fileArray = Array.from(files).slice(0, 5);
+    setSelectedFiles(fileArray);
+  };
 
   const categories: { value: IncidentCategory; label: string }[] = [
     { value: 'medical-emergency', label: 'Medical Emergency' },
@@ -78,44 +75,6 @@ function NewIncidentPageContent() {
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    
-    // Validate file count
-    if (images.length + files.length > 5) {
-      setError('Maximum 5 images allowed');
-      return;
-    }
-
-    // Validate file size and type
-    for (const file of files) {
-      if (file.size > 5 * 1024 * 1024) {
-        setError('Each image must be under 5MB');
-        return;
-      }
-      if (!file.type.startsWith('image/')) {
-        setError('Only image files are allowed');
-        return;
-      }
-    }
-
-    setError('');
-    setImages(prev => [...prev, ...files]);
-
-    // Create previews
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreviews(prev => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removeImage = (index: number) => {
-    setImages(prev => prev.filter((_, i) => i !== index));
-    setImagePreviews(prev => prev.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,10 +96,24 @@ function NewIncidentPageContent() {
     }
 
     setLoading(true);
-    setUploadProgress(0);
 
     try {
-      // Create incident data
+      let imageUrls: string[] = [];
+
+      // If images were selected, upload them first and collect URLs
+      if (selectedFiles.length > 0) {
+        try {
+          const tempId = `${user.uid}-${Date.now()}`;
+          imageUrls = await uploadIncidentImages(selectedFiles, tempId, user.uid);
+        } catch (uploadErr) {
+          console.error('Error uploading images:', uploadErr);
+          setError('Failed to upload images. Please try again.');
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Base incident data (including image URLs if any)
       const incidentData = {
         reportedBy: user.uid,
         reporterName: formData.isAnonymous ? 'Anonymous' : (userProfile?.displayName || user.displayName || 'User'),
@@ -152,28 +125,18 @@ function NewIncidentPageContent() {
         severity: formData.severity,
         status: 'submitted' as const,
         isAnonymous: formData.isAnonymous,
-      };
+        ...(imageUrls.length > 0 ? { imageUrls } : {}),
+      } as const;
 
-      // Create incident in Firestore
+      // Create the incident with image URLs included
       const incidentId = await createIncident(incidentData);
-      setUploadProgress(30);
-
-      // Upload images if any
-      let imageUrls: string[] = [];
-      if (images.length > 0) {
-        setUploadProgress(40);
-        imageUrls = await uploadIncidentImages(images, incidentId, user.uid);
-        setUploadProgress(80);
-      }
-
-      setUploadProgress(100);
 
       // Success - redirect to incident details
       setTimeout(() => {
         router.push(`/incidents/${incidentId}`);
       }, 500);
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error submitting incident:', err);
       setError('Failed to submit incident. Please try again.');
       setLoading(false);
@@ -195,16 +158,7 @@ function NewIncidentPageContent() {
                 Provide details about the incident. All fields marked with * are required.
               </p>
               <div className="alert-error" style={{ marginTop: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'start', gap: '0.75rem' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ flexShrink: 0, marginTop: '0.125rem' }}>
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="12" y1="8" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12.01" y2="16" />
-                  </svg>
-                  <p style={{ fontWeight: '600', fontSize: '0.875rem', margin: 0 }}>
-                    For life-threatening emergencies, call Campus Security immediately: 911
-                  </p>
-                </div>
+                
               </div>
             </div>
 
@@ -284,6 +238,30 @@ function NewIncidentPageContent() {
                   className="textarea"
                   placeholder="Provide detailed information about what happened..."
                 />
+              </div>
+
+              {/* Images */}
+              <div>
+                <label htmlFor="images" className="label">
+                  Attach Images (optional)
+                </label>
+                <input
+                  type="file"
+                  id="images"
+                  name="images"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  className="input"
+                />
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
+                  You can upload up to 5 images to help responders understand the situation.
+                </p>
+                {selectedFiles.length > 0 && (
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                    Selected {selectedFiles.length} image(s): {selectedFiles.map(f => f.name).join(', ')}
+                  </p>
+                )}
               </div>
 
               {/* Location */}
@@ -369,62 +347,6 @@ function NewIncidentPageContent() {
                 </select>
               </div>
 
-              {/* Image Upload */}
-              <div>
-                <label className="label" style={{ marginBottom: '0.5rem' }}>
-                  Images (Optional, max 5)
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageChange}
-                  disabled={images.length >= 5}
-                  className="input"
-                  style={{ cursor: 'pointer' }}
-                />
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginTop: '0.25rem' }}>
-                  Maximum 5 images, each under 5MB
-                </p>
-
-                {/* Image Previews */}
-                {imagePreviews.length > 0 && (
-                  <div style={{ marginTop: '1rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
-                    {imagePreviews.map((preview, index) => (
-                      <div key={index} style={{ position: 'relative' }}>
-                        <img
-                          src={preview}
-                          alt={`Preview ${index + 1}`}
-                          style={{ width: '100%', height: '150px', objectFit: 'cover', borderRadius: '0.5rem' }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          style={{
-                            position: 'absolute',
-                            top: '0.5rem',
-                            right: '0.5rem',
-                            backgroundColor: 'var(--danger)',
-                            color: 'white',
-                            borderRadius: '50%',
-                            padding: '0.25rem',
-                            border: 'none',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                        >
-                          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
               {/* Anonymous Option */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <input
@@ -439,21 +361,6 @@ function NewIncidentPageContent() {
                   Submit anonymously (your identity will be hidden)
                 </label>
               </div>
-
-              {/* Progress Bar */}
-              {loading && uploadProgress > 0 && (
-                <div style={{ width: '100%', backgroundColor: 'var(--border-color)', borderRadius: '9999px', height: '0.625rem', overflow: 'hidden' }}>
-                  <div
-                    style={{ 
-                      backgroundColor: 'var(--primary)', 
-                      height: '100%', 
-                      borderRadius: '9999px', 
-                      transition: 'width 0.3s ease',
-                      width: `${uploadProgress}%`
-                    }}
-                  />
-                </div>
-              )}
 
               {/* Submit Button */}
               <div style={{ display: 'flex', gap: '1rem' }}>

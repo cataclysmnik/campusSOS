@@ -62,6 +62,7 @@ export const getIncidents = async (
     status?: IncidentStatus;
     category?: IncidentCategory;
     assignedTo?: string;
+    onNoticeboard?: boolean;
     limitCount?: number;
   }
 ): Promise<Incident[]> => {
@@ -79,6 +80,9 @@ export const getIncidents = async (
     }
     if (filters?.assignedTo) {
       constraints.push(where('assignedTo', '==', filters.assignedTo));
+    }
+    if (typeof filters?.onNoticeboard === 'boolean') {
+      constraints.push(where('onNoticeboard', '==', filters.onNoticeboard));
     }
     if (filters?.limitCount) {
       constraints.push(limit(filters.limitCount));
@@ -145,6 +149,47 @@ export const assignIncident = async (
 };
 
 /**
+ * Attach uploaded image URLs to an incident
+ */
+export const addIncidentImages = async (
+  incidentId: string,
+  imageUrls: string[]
+): Promise<void> => {
+  if (!imageUrls.length) return;
+  try {
+    const incidentRef = doc(db, 'incidents', incidentId);
+    const existing = await getDoc(incidentRef);
+    const prevUrls = (existing.exists() && (existing.data().imageUrls as string[] | undefined)) || [];
+
+    await updateDoc(incidentRef, {
+      imageUrls: [...prevUrls, ...imageUrls],
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Add incident images error:', error);
+    throw error;
+  }
+};
+
+/**
+ * Toggle incident noticeboard visibility
+ */
+export const setIncidentNoticeboardStatus = async (
+  incidentId: string,
+  onNoticeboard: boolean
+): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'incidents', incidentId), {
+      onNoticeboard,
+      updatedAt: serverTimestamp(),
+    });
+  } catch (error) {
+    console.error('Set incident noticeboard status error:', error);
+    throw error;
+  }
+};
+
+/**
  * Real-time incident listener
  */
 export const subscribeToIncident = (
@@ -169,6 +214,7 @@ export const subscribeToIncidents = (
     userId?: string;
     status?: IncidentStatus;
     category?: IncidentCategory;
+    onNoticeboard?: boolean;
   }
 ) => {
   const constraints: QueryConstraint[] = [orderBy('createdAt', 'desc')];
@@ -181,6 +227,9 @@ export const subscribeToIncidents = (
   }
   if (filters?.category) {
     constraints.push(where('category', '==', filters.category));
+  }
+  if (typeof filters?.onNoticeboard === 'boolean') {
+    constraints.push(where('onNoticeboard', '==', filters.onNoticeboard));
   }
 
   const q = query(collection(db, 'incidents'), ...constraints);

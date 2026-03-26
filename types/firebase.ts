@@ -73,6 +73,7 @@ export interface Incident {
   status: IncidentStatus;
   imageUrls?: string[];
   isAnonymous: boolean;
+  onNoticeboard?: boolean;
   
   // Assignment
   assignedTo?: string;

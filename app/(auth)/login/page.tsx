@@ -1,15 +1,13 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 
-function LoginPageContent() {
+export default function LoginPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { login } = useAuth();
-  const [redirectUrl, setRedirectUrl] = useState('/dashboard');
   
   const [formData, setFormData] = useState({
     email: '',
@@ -19,14 +17,6 @@ function LoginPageContent() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // Get redirect URL from query params
-  useEffect(() => {
-    const redirect = searchParams.get('redirect');
-    if (redirect) {
-      setRedirectUrl(decodeURIComponent(redirect));
-    }
-  }, [searchParams]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -34,7 +24,7 @@ function LoginPageContent() {
 
     try {
       await login(formData.email, formData.password);
-      router.push(redirectUrl);
+      router.push('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
       
@@ -191,13 +181,5 @@ function LoginPageContent() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <LoginPageContent />
-    </Suspense>
   );
 }

@@ -2,8 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User } from 'firebase/auth';
-import { onAuthChange, getCurrentUser, loginUser, logoutUser, registerUser } from '@/lib/firebase/auth';
-import { getUserProfile } from '@/lib/firebase/auth';
+import { onAuthChange, getCurrentUser, loginUser, logoutUser, registerUser, getOrCreateUserProfile } from '@/lib/firebase/auth';
 import { UserProfile, UserRole } from '@/types/firebase';
 
 interface AuthContextType {
@@ -27,12 +26,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(firebaseUser);
       
       if (firebaseUser) {
-        // Fetch user profile from Firestore
-        try {
-          const profile = await getUserProfile(firebaseUser.uid);
-          setUserProfile(profile);
-        } catch (error) {
-          console.error('Error fetching user profile:', error);
+        // Get or create user profile
+        let profile = null;
+        let attempts = 0;
+        
+        // Add a small initial delay to allow Firestore to sync after registration
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        while (!profile && attempts < 5) {
+          try {
+            profile = await getOrCreateUserProfile(firebaseUser);
+            if (profile) {
+              setUserProfile(profile);
+              console.log('Profile loaded:', profile.email, 'Role:', profile.role);
+              break;
+            }
+          } catch (error) {
+            console.error('Error getting/creating user profile (attempt ' + (attempts + 1) + '):', error);
+          }
+          
+          attempts++;
+          if (!profile && attempts < 5) {
+            // Wait 500ms before retrying
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
+        }
+        
+        if (!profile) {
+          console.error('Failed to load user profile after 5 attempts');
           setUserProfile(null);
         }
       } else {
