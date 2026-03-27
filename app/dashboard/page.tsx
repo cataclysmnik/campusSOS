@@ -83,7 +83,9 @@ export default function DashboardPage() {
       <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-secondary)' }}>
         <Navbar />
 
-        <div className="container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+        <div className="dashboard-container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
+          <div className="dashboard-layout">
+            <div className="dashboard-main">
           {/* Welcome Section */}
           <div className="card" style={{ marginBottom: '2rem' }}>
             <div className="card-body">
@@ -255,8 +257,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          </div>
+
+          <aside className="dashboard-noticeboard">
           {/* Campus Noticeboard */}
-          <div className="card" style={{ marginTop: '2rem' }}>
+          <div className="card" style={{ height: '100%' }}>
             <div className="card-header">
               <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)' }}>
                 Campus Noticeboard
@@ -406,9 +411,33 @@ export default function DashboardPage() {
               )}
             </div>
           </div>
+          </aside>
+          </div>
         </div>
 
         <style jsx>{`
+          .dashboard-container {
+            width: 100%;
+            max-width: 1024px;
+            margin: 0 auto;
+            padding-left: 1rem;
+            padding-right: 1rem;
+          }
+          .dashboard-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+            gap: 2rem;
+            align-items: start;
+          }
+          .dashboard-main {
+            min-width: 0;
+          }
+          .dashboard-noticeboard {
+            min-width: 0;
+            position: sticky;
+            top: 1rem;
+            height: fit-content;
+          }
           .spinner {
             animation: spin 1s linear infinite;
           }
@@ -418,6 +447,26 @@ export default function DashboardPage() {
           .incident-card:hover {
             box-shadow: var(--shadow-md);
             border-color: var(--primary);
+          }
+          @media (max-width: 1024px) {
+            .dashboard-layout {
+              grid-template-columns: 1fr;
+            }
+            .dashboard-noticeboard {
+              position: static;
+            }
+          }
+          @media (min-width: 640px) {
+            .dashboard-container {
+              padding-left: 1.5rem;
+              padding-right: 1.5rem;
+            }
+          }
+          @media (min-width: 1024px) {
+            .dashboard-container {
+              padding-left: 2rem;
+              padding-right: 2rem;
+            }
           }
         `}</style>
       </div>

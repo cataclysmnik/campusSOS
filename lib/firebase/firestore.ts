@@ -19,6 +19,35 @@ import {
 import { db } from './config';
 import { Incident, IncidentStatus, IncidentCategory } from '@/types/firebase';
 
+const normalizeImageUrls = (value: unknown): string[] | undefined => {
+  if (Array.isArray(value)) {
+    return value.filter((url): url is string => typeof url === 'string');
+  }
+
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.filter((url): url is string => typeof url === 'string');
+      }
+    } catch {
+      return undefined;
+    }
+  }
+
+  return undefined;
+};
+
+const mapIncidentDoc = (id: string, data: DocumentData): Incident => {
+  const normalizedImageUrls = normalizeImageUrls(data.imageUrls);
+
+  return {
+    id,
+    ...data,
+    ...(normalizedImageUrls ? { imageUrls: normalizedImageUrls } : {}),
+  } as Incident;
+};
+
 /**
  * Create a new incident report
  */
@@ -26,6 +55,9 @@ export const createIncident = async (incidentData: Omit<Incident, 'id' | 'create
   try {
     const incidentRef = await addDoc(collection(db, 'incidents'), {
       ...incidentData,
+      ...(incidentData.imageUrls
+        ? { imageUrls: JSON.stringify(incidentData.imageUrls) }
+        : {}),
       status: 'submitted',
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -44,7 +76,7 @@ export const getIncident = async (incidentId: string): Promise<Incident | null> 
   try {
     const incidentDoc = await getDoc(doc(db, 'incidents', incidentId));
     if (incidentDoc.exists()) {
-      return { id: incidentDoc.id, ...incidentDoc.data() } as Incident;
+      return mapIncidentDoc(incidentDoc.id, incidentDoc.data());
     }
     return null;
   } catch (error) {
@@ -91,10 +123,7 @@ export const getIncidents = async (
     const q = query(collection(db, 'incidents'), ...constraints);
     const querySnapshot = await getDocs(q);
 
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Incident[];
+    return querySnapshot.docs.map(doc => mapIncidentDoc(doc.id, doc.data()));
   } catch (error) {
     console.error('Get incidents error:', error);
     throw error;
@@ -159,10 +188,12 @@ export const addIncidentImages = async (
   try {
     const incidentRef = doc(db, 'incidents', incidentId);
     const existing = await getDoc(incidentRef);
-    const prevUrls = (existing.exists() && (existing.data().imageUrls as string[] | undefined)) || [];
+    const prevUrls = existing.exists()
+      ? normalizeImageUrls(existing.data().imageUrls) || []
+      : [];
 
     await updateDoc(incidentRef, {
-      imageUrls: [...prevUrls, ...imageUrls],
+      imageUrls: JSON.stringify([...prevUrls, ...imageUrls]),
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
@@ -198,7 +229,7 @@ export const subscribeToIncident = (
 ) => {
   return onSnapshot(doc(db, 'incidents', incidentId), (doc) => {
     if (doc.exists()) {
-      callback({ id: doc.id, ...doc.data() } as Incident);
+      callback(mapIncidentDoc(doc.id, doc.data()));
     } else {
       callback(null);
     }
@@ -235,10 +266,7 @@ export const subscribeToIncidents = (
   const q = query(collection(db, 'incidents'), ...constraints);
 
   return onSnapshot(q, (querySnapshot) => {
-    const incidents = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Incident[];
+    const incidents = querySnapshot.docs.map(doc => mapIncidentDoc(doc.id, doc.data()));
     callback(incidents);
   });
 };

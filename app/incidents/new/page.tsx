@@ -34,11 +34,34 @@ function NewIncidentPageContent() {
   const [error, setError] = useState('');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
+  const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files) return;
 
     const fileArray = Array.from(files).slice(0, 5);
+
+    const invalidTypeFile = fileArray.find((file) => {
+      const lower = file.name.toLowerCase();
+      const hasImageExtension = /\.(jpg|jpeg|png|webp|gif|bmp|heic|heif)$/i.test(lower);
+      return !(file.type.startsWith('image/') || hasImageExtension);
+    });
+
+    if (invalidTypeFile) {
+      setError(`"${invalidTypeFile.name}" is not a supported image file.`);
+      setSelectedFiles([]);
+      return;
+    }
+
+    const oversizedFile = fileArray.find((file) => file.size > MAX_IMAGE_SIZE_BYTES);
+    if (oversizedFile) {
+      setError(`"${oversizedFile.name}" exceeds the 5MB image limit.`);
+      setSelectedFiles([]);
+      return;
+    }
+
+    setError('');
     setSelectedFiles(fileArray);
   };
 
@@ -107,7 +130,7 @@ function NewIncidentPageContent() {
           imageUrls = await uploadIncidentImages(selectedFiles, tempId, user.uid);
         } catch (uploadErr) {
           console.error('Error uploading images:', uploadErr);
-          setError('Failed to upload images. Please try again.');
+          setError(uploadErr instanceof Error ? uploadErr.message : 'Failed to upload images. Please try again.');
           setLoading(false);
           return;
         }

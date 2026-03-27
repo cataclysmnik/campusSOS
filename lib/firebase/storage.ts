@@ -1,13 +1,88 @@
-import {
-  ref,
-  uploadBytes,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-  UploadMetadata,
-  UploadTask,
-} from 'firebase/storage';
-import { storage } from './config';
+type CloudinaryUploadResponse = {
+  secure_url: string;
+  public_id: string;
+  original_filename?: string;
+};
+
+type ProgressTask = {
+  abort: () => void;
+};
+
+const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+const ensureCloudinaryConfig = (): void => {
+  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
+    throw new Error(
+      'Cloudinary is not configured. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET in .env.local.'
+    );
+  }
+};
+
+const inferContentType = (fileName: string): string | null => {
+  const lower = fileName.toLowerCase();
+  if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+  if (lower.endsWith('.png')) return 'image/png';
+  if (lower.endsWith('.webp')) return 'image/webp';
+  if (lower.endsWith('.gif')) return 'image/gif';
+  if (lower.endsWith('.bmp')) return 'image/bmp';
+  if (lower.endsWith('.heic')) return 'image/heic';
+  if (lower.endsWith('.heif')) return 'image/heif';
+  return null;
+};
+
+const sanitizeFileName = (fileName: string): string =>
+  fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+
+const formatUploadError = (error: unknown): Error => {
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return new Error('Image upload failed due to an unknown error.');
+};
+
+const uploadToCloudinary = async (
+  file: File,
+  folder: string,
+  publicIdPrefix?: string
+): Promise<CloudinaryUploadResponse> => {
+  ensureCloudinaryConfig();
+
+  const uploadUrl = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+  const timestamp = Date.now();
+  const baseName = sanitizeFileName(file.name.replace(/\.[^.]+$/, ''));
+  const publicId = publicIdPrefix
+    ? `${publicIdPrefix}-${timestamp}-${baseName}`
+    : `${timestamp}-${baseName}`;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET!);
+  formData.append('folder', folder);
+  formData.append('public_id', publicId);
+
+  const response = await fetch(uploadUrl, {
+    method: 'POST',
+    body: formData,
+  });
+
+  const responseBody = (await response.json()) as
+    | CloudinaryUploadResponse
+    | { error?: { message?: string } };
+
+  if (!response.ok || !('secure_url' in responseBody)) {
+    const cloudinaryMessage =
+      'error' in responseBody ? responseBody.error?.message : undefined;
+    throw new Error(
+      `Cloudinary upload failed (${response.status}): ${cloudinaryMessage || 'Unknown Cloudinary error.'}`
+    );
+  }
+
+  return responseBody;
+};
 
 /**
  * Upload incident image
@@ -18,25 +93,21 @@ export const uploadIncidentImage = async (
   userId: string
 ): Promise<string> => {
   try {
-    const timestamp = Date.now();
-    const fileName = `${timestamp}-${file.name}`;
-    const storageRef = ref(storage, `incidents/${incidentId}/${fileName}`);
+    const resolvedContentType = file.type || inferContentType(file.name);
+    if (!resolvedContentType || !resolvedContentType.startsWith('image/')) {
+      throw new Error(`Unsupported file type for "${file.name}". Please upload a valid image.`);
+    }
 
-    const metadata: UploadMetadata = {
-      contentType: file.type,
-      customMetadata: {
-        uploadedBy: userId,
-        incidentId,
-      },
-    };
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      throw new Error(`"${file.name}" exceeds the 5MB limit.`);
+    }
 
-    await uploadBytes(storageRef, file, metadata);
-    const downloadURL = await getDownloadURL(storageRef);
-
-    return downloadURL;
+    const uploadResult = await uploadToCloudinary(file, `incidents/${incidentId}`, userId);
+    return uploadResult.secure_url;
   } catch (error) {
-    console.error('Upload incident image error:', error);
-    throw error;
+    const normalizedError = formatUploadError(error);
+    console.error('Upload incident image error:', normalizedError);
+    throw normalizedError;
   }
 };
 
@@ -49,13 +120,16 @@ export const uploadIncidentImages = async (
   userId: string
 ): Promise<string[]> => {
   try {
+    if (!files.length) return [];
+
     const uploadPromises = files.map(file =>
       uploadIncidentImage(file, incidentId, userId)
     );
     return await Promise.all(uploadPromises);
   } catch (error) {
-    console.error('Upload incident images error:', error);
-    throw error;
+    const normalizedError = formatUploadError(error);
+    console.error('Upload incident images error:', normalizedError);
+    throw normalizedError;
   }
 };
 
@@ -67,42 +141,37 @@ export const uploadIncidentImageWithProgress = (
   incidentId: string,
   userId: string,
   onProgress?: (progress: number) => void
-): UploadTask => {
-  const timestamp = Date.now();
-  const fileName = `${timestamp}-${file.name}`;
-  const storageRef = ref(storage, `incidents/${incidentId}/${fileName}`);
+): ProgressTask => {
+  let aborted = false;
 
-  const metadata: UploadMetadata = {
-    contentType: file.type,
-    customMetadata: {
-      uploadedBy: userId,
-      incidentId,
-    },
+  const runUpload = async () => {
+    try {
+      onProgress?.(0);
+      await uploadIncidentImage(file, incidentId, userId);
+      if (!aborted) {
+        onProgress?.(100);
+      }
+    } catch (error) {
+      if (!aborted) {
+        console.error('Upload with progress error:', error);
+      }
+    }
   };
 
-  const uploadTask = uploadBytesResumable(storageRef, file, metadata);
+  void runUpload();
 
-  if (onProgress) {
-    uploadTask.on('state_changed', (snapshot) => {
-      const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-      onProgress(progress);
-    });
-  }
-
-  return uploadTask;
+  return {
+    abort: () => {
+      aborted = true;
+    },
+  };
 };
 
 /**
  * Delete incident image
  */
 export const deleteIncidentImage = async (imageUrl: string): Promise<void> => {
-  try {
-    const imageRef = ref(storage, imageUrl);
-    await deleteObject(imageRef);
-  } catch (error) {
-    console.error('Delete incident image error:', error);
-    throw error;
-  }
+  console.warn('deleteIncidentImage is not configured for Cloudinary client-side deletes:', imageUrl);
 };
 
 /**
@@ -113,21 +182,20 @@ export const uploadProfilePicture = async (
   userId: string
 ): Promise<string> => {
   try {
-    const storageRef = ref(storage, `profiles/${userId}/avatar.${file.name.split('.').pop()}`);
+    const resolvedContentType = file.type || inferContentType(file.name);
+    if (!resolvedContentType || !resolvedContentType.startsWith('image/')) {
+      throw new Error(`Unsupported file type for "${file.name}". Please upload a valid image.`);
+    }
 
-    const metadata: UploadMetadata = {
-      contentType: file.type,
-      customMetadata: {
-        userId,
-      },
-    };
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      throw new Error(`"${file.name}" exceeds the 5MB limit.`);
+    }
 
-    await uploadBytes(storageRef, file, metadata);
-    const downloadURL = await getDownloadURL(storageRef);
-
-    return downloadURL;
+    const uploadResult = await uploadToCloudinary(file, `profiles/${userId}`, 'avatar');
+    return uploadResult.secure_url;
   } catch (error) {
-    console.error('Upload profile picture error:', error);
-    throw error;
+    const normalizedError = formatUploadError(error);
+    console.error('Upload profile picture error:', normalizedError);
+    throw normalizedError;
   }
 };

@@ -389,9 +389,18 @@ export default function AdminPage() {
                               {userProfile?.role === 'admin' && (
                                 <button
                                   onClick={() => handleToggleNoticeboard(incident)}
-                                  className="btn btn-sm btn-ghost"
+                                  className={`btn btn-sm ${incident.onNoticeboard ? 'btn-primary' : 'btn-ghost'}`}
+                                  aria-pressed={incident.onNoticeboard}
+                                  aria-label={incident.onNoticeboard ? 'Remove from noticeboard' : 'Add to noticeboard'}
+                                  title={incident.onNoticeboard ? 'Remove from noticeboard' : 'Add to noticeboard'}
+                                  style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '0.4rem 0.8rem' }}
                                 >
-                                  {incident.onNoticeboard ? 'Remove from Noticeboard' : 'Add to Noticeboard'}
+                                  {/* Noticeboard icon (pin) - icon-only button */}
+                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ display: 'block' }}>
+                                    <path d="M12 2v7" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M7 11h10" strokeLinecap="round" strokeLinejoin="round" />
+                                    <path d="M10 14l-1 7 3-2 3 2-1-7" strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
                                 </button>
                               )}
                               <button
