@@ -229,6 +229,42 @@ export default function DashboardPage() {
                             <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                               {incident.description.substring(0, 150)}...
                             </p>
+                            {incident.imageUrls && incident.imageUrls.length > 0 && (
+                              <div
+                                style={{
+                                  display: 'grid',
+                                  gridTemplateColumns: 'repeat(auto-fill, minmax(64px, 1fr))',
+                                  gap: '0.5rem',
+                                  marginBottom: '0.75rem',
+                                }}
+                              >
+                                {incident.imageUrls.map((url, index) => (
+                                  <div
+                                    key={`${incident.id}-recent-img-${index}`}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      e.stopPropagation();
+                                      window.open(url, '_blank', 'noopener,noreferrer');
+                                    }}
+                                    title="Open full image"
+                                    style={{ cursor: 'zoom-in', lineHeight: 0 }}
+                                  >
+                                    <img
+                                      src={url}
+                                      alt={`Incident image ${index + 1}`}
+                                      className="noticeboard-image-thumb"
+                                      style={{
+                                        width: '100%',
+                                        height: '3.5rem',
+                                        borderRadius: '0.5rem',
+                                        objectFit: 'cover',
+                                        border: '1px solid var(--border-color)',
+                                      }}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.75rem', color: 'var(--text-tertiary)', flexWrap: 'wrap' }}>
                               <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -318,23 +354,37 @@ export default function DashboardPage() {
                       >
                         <div style={{ flex: 1, minWidth: '220px' }}>
                           {incident.imageUrls && incident.imageUrls.length > 0 && (
-                            <div style={{ marginBottom: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
-                              <img
-                                src={incident.imageUrls[0]}
-                                alt="Incident preview"
-                                style={{
-                                  width: '3.25rem',
-                                  height: '3.25rem',
-                                  borderRadius: '0.5rem',
-                                  objectFit: 'cover',
-                                  border: '1px solid var(--border-color)',
-                                }}
-                              />
-                              {incident.imageUrls.length > 1 && (
-                                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                                  +{incident.imageUrls.length - 1} more
-                                </span>
-                              )}
+                            <div
+                              style={{
+                                marginBottom: '0.75rem',
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(56px, 1fr))',
+                                gap: '0.5rem',
+                              }}
+                            >
+                              {incident.imageUrls.map((url, index) => (
+                                <a
+                                  key={`${incident.id}-img-${index}`}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  title="Open full image"
+                                  style={{ display: 'block', lineHeight: 0 }}
+                                >
+                                  <img
+                                    src={url}
+                                    alt={`Incident image ${index + 1}`}
+                                    className="noticeboard-image-thumb"
+                                    style={{
+                                      width: '100%',
+                                      height: '3.5rem',
+                                      borderRadius: '0.5rem',
+                                      objectFit: 'cover',
+                                      border: '1px solid var(--border-color)',
+                                    }}
+                                  />
+                                </a>
+                              ))}
                             </div>
                           )}
                           <div
@@ -465,6 +515,14 @@ export default function DashboardPage() {
             to { transform: rotate(360deg); }
           }
           .incident-card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+          }
+          .noticeboard-image-thumb {
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+          }
+          .noticeboard-image-thumb:hover {
+            transform: translateY(-1px) scale(1.03);
             box-shadow: var(--shadow-md);
             border-color: var(--primary);
           }
