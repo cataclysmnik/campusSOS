@@ -6,7 +6,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import RoleGuard from '@/components/RoleGuard';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
-import { getIncidents, updateIncidentStatus, assignIncident, subscribeToIncidents } from '@/lib/firebase/firestore';
+import { getIncidents, updateIncidentStatus, assignIncident, subscribeToIncidents, setIncidentNoticeboardStatus } from '@/lib/firebase/firestore';
 import { Incident, IncidentStatus, IncidentCategory, SeverityLevel } from '@/types/firebase';
 
 export default function AdminPage() {
@@ -119,6 +119,17 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Action error:', error);
       alert('Failed to perform action. Please try again.');
+    }
+  };
+
+  const handleToggleNoticeboard = async (incident: Incident) => {
+    if (!userProfile || userProfile.role !== 'admin') return;
+
+    try {
+      await setIncidentNoticeboardStatus(incident.id, !incident.onNoticeboard);
+    } catch (error) {
+      console.error('Toggle noticeboard error:', error);
+      alert('Failed to update noticeboard status. Please try again.');
     }
   };
 
@@ -375,6 +386,14 @@ export default function AdminPage() {
                               >
                                 Update
                               </button>
+                              {userProfile?.role === 'admin' && (
+                                <button
+                                  onClick={() => handleToggleNoticeboard(incident)}
+                                  className="btn btn-sm btn-ghost"
+                                >
+                                  {incident.onNoticeboard ? 'Remove from Noticeboard' : 'Add to Noticeboard'}
+                                </button>
+                              )}
                               <button
                                 onClick={() => router.push(`/incidents/${incident.id}`)}
                                 className="btn btn-sm btn-ghost"

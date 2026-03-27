@@ -249,9 +249,9 @@ export default function IncidentDetailPage() {
             </div>
 
             {/* Images */}
-            {incident.imageUrls && incident.imageUrls.length > 0 && (
-              <div style={{ padding: '0 2rem 2rem' }}>
-                <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.75rem' }}>Images</h3>
+            <div style={{ padding: '0 2rem 2rem' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '0.75rem' }}>Images</h3>
+              {incident.imageUrls && incident.imageUrls.length > 0 ? (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                   {incident.imageUrls.map((url, index) => (
                     <a
@@ -270,8 +270,12 @@ export default function IncidentDetailPage() {
                     </a>
                   ))}
                 </div>
-              </div>
-            )}
+              ) : (
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                  No images attached to this incident.
+                </p>
+              )}
+            </div>
 
             {/* Status Timeline */}
             {incident.statusHistory && (

@@ -5,13 +5,15 @@ import Navbar from '@/components/Navbar';
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getIncidents } from '@/lib/firebase/firestore';
+import { getIncidents, subscribeToIncidents } from '@/lib/firebase/firestore';
 import { Incident } from '@/types/firebase';
 
 export default function DashboardPage() {
   const { user, userProfile } = useAuth();
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
+  const [noticeboardIncidents, setNoticeboardIncidents] = useState<Incident[]>([]);
+  const [loadingNoticeboard, setLoadingNoticeboard] = useState(true);
 
   useEffect(() => {
     const fetchIncidents = async () => {
@@ -32,6 +34,15 @@ export default function DashboardPage() {
 
     fetchIncidents();
   }, [user]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToIncidents((data) => {
+      setNoticeboardIncidents(data.filter((inc) => inc.onNoticeboard));
+      setLoadingNoticeboard(false);
+    }, { onNoticeboard: true });
+
+    return () => unsubscribe();
+  }, []);
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -238,6 +249,158 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Campus Noticeboard */}
+          <div className="card" style={{ marginTop: '2rem' }}>
+            <div className="card-header">
+              <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--text-primary)' }}>
+                Campus Noticeboard
+              </h2>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                Events and incidents highlighted by campus admins.
+              </p>
+            </div>
+            <div className="card-body">
+              {loadingNoticeboard ? (
+                <div style={{ textAlign: 'center', padding: '3rem 0' }}>
+                  <div
+                    style={{
+                      width: '3rem',
+                      height: '3rem',
+                      border: '3px solid var(--border-color)',
+                      borderTopColor: 'var(--primary)',
+                      borderRadius: '50%',
+                      margin: '0 auto 1rem',
+                    }}
+                    className="spinner"
+                  />
+                  <p style={{ color: 'var(--text-secondary)' }}>Loading noticeboard...</p>
+                </div>
+              ) : noticeboardIncidents.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2.5rem 0' }}>
+                  <p style={{ color: 'var(--text-secondary)' }}>
+                    No items are currently on the noticeboard.
+                  </p>
+                  <p style={{ color: 'var(--text-tertiary)', fontSize: '0.875rem', marginTop: '0.25rem' }}>
+                    When admins highlight important incidents, they will appear here.
+                  </p>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {noticeboardIncidents.map((incident) => (
+                    <div
+                      key={incident.id}
+                      style={{
+                        border: '1px solid var(--border-color)',
+                        borderRadius: '0.5rem',
+                        padding: '1rem',
+                        backgroundColor: 'var(--bg-primary)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          gap: '1rem',
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <div style={{ flex: 1, minWidth: '220px' }}>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.75rem',
+                              marginBottom: '0.5rem',
+                              flexWrap: 'wrap',
+                            }}
+                          >
+                            <h3
+                              style={{
+                                fontSize: '1.125rem',
+                                fontWeight: '600',
+                                color: 'var(--text-primary)',
+                              }}
+                            >
+                              {incident.title}
+                            </h3>
+                            <span className={`badge ${getStatusBadgeClass(incident.status)}`}>
+                              {incident.status}
+                            </span>
+                          </div>
+                          <p
+                            style={{
+                              fontSize: '0.875rem',
+                              color: 'var(--text-secondary)',
+                              marginBottom: '0.5rem',
+                            }}
+                          >
+                            {incident.description.substring(0, 180)}
+                            {incident.description.length > 180 ? '...' : ''}
+                          </p>
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '1rem',
+                              fontSize: '0.75rem',
+                              color: 'var(--text-tertiary)',
+                              flexWrap: 'wrap',
+                            }}
+                          >
+                            <span
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                              }}
+                            >
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                              >
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                              </svg>
+                              {incident.location.building}
+                            </span>
+                            <span>{incident.category.replace('-', ' ')}</span>
+                            <span
+                              style={{
+                                fontWeight: '600',
+                                color: getSeverityColor(incident.severity),
+                              }}
+                            >
+                              {incident.severity.toUpperCase()}
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          style={{
+                            fontSize: '0.875rem',
+                            color: 'var(--text-tertiary)',
+                            textAlign: 'right',
+                            minWidth: '100px',
+                          }}
+                        >
+                          {incident.createdAt &&
+                          typeof incident.createdAt === 'object' &&
+                          'toDate' in incident.createdAt
+                            ? new Date(incident.createdAt.toDate()).toLocaleString()
+                            : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}

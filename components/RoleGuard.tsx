@@ -41,10 +41,16 @@ export default function RoleGuard({ children, allowedRoles, fallback }: RoleGuar
     );
   }
 
+  console.log('RoleGuard check - userProfile:', userProfile, 'allowedRoles:', allowedRoles);
+
   if (!userProfile || !allowedRoles.includes(userProfile.role)) {
     if (fallback) {
       return <>{fallback}</>;
     }
+    
+    // If userProfile is null but loading is complete, the user truly doesn't have access
+    // If userProfile exists but role not in allowedRoles, deny access
+    const isAccessDenied = !userProfile || !allowedRoles.includes(userProfile.role);
     
     return (
       <div style={{ 
@@ -66,7 +72,9 @@ export default function RoleGuard({ children, allowedRoles, fallback }: RoleGuar
                 Access Denied
               </h2>
               <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-                You don't have permission to access this page.
+                {!userProfile 
+                  ? 'Unable to load your profile. Please try refreshing the page.' 
+                  : `You don't have permission to access this page. Your role is: ${userProfile.role}`}
               </p>
               <button
                 onClick={() => router.push('/dashboard')}
