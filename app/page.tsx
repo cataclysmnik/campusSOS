@@ -107,7 +107,7 @@ export default function Home() {
             backgroundClip: 'text',
             animation: 'fadeInUp 0.8s ease-out'
           }}>
-            Campus Emergency<br />Reporting System
+            CampusSOS<br />Campus Emergency Reporting System
           </h1>
           <p style={{ 
             fontSize: 'clamp(1rem, 2vw, 1.25rem)', 
