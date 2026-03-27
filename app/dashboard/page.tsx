@@ -106,10 +106,10 @@ export default function DashboardPage() {
             marginBottom: '2rem'
           }}>
             <Link href="/incidents/new" style={{ textDecoration: 'none', height: '100%' }}>
-              <div className="card" style={{ 
+              <div className="card report-incident-card" style={{ 
                 background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)',
                 cursor: 'pointer',
-                transition: 'transform 0.2s ease',
+                transition: 'all 0.22s ease',
                 height: '100%'
               }}>
                 <div className="card-body" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -317,6 +317,26 @@ export default function DashboardPage() {
                         }}
                       >
                         <div style={{ flex: 1, minWidth: '220px' }}>
+                          {incident.imageUrls && incident.imageUrls.length > 0 && (
+                            <div style={{ marginBottom: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                              <img
+                                src={incident.imageUrls[0]}
+                                alt="Incident preview"
+                                style={{
+                                  width: '3.25rem',
+                                  height: '3.25rem',
+                                  borderRadius: '0.5rem',
+                                  objectFit: 'cover',
+                                  border: '1px solid var(--border-color)',
+                                }}
+                              />
+                              {incident.imageUrls.length > 1 && (
+                                <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                                  +{incident.imageUrls.length - 1} more
+                                </span>
+                              )}
+                            </div>
+                          )}
                           <div
                             style={{
                               display: 'flex',
@@ -418,7 +438,7 @@ export default function DashboardPage() {
         <style jsx>{`
           .dashboard-container {
             width: 100%;
-            max-width: 1024px;
+            max-width: 1560px;
             margin: 0 auto;
             padding-left: 1rem;
             padding-right: 1rem;
@@ -447,6 +467,11 @@ export default function DashboardPage() {
           .incident-card:hover {
             box-shadow: var(--shadow-md);
             border-color: var(--primary);
+          }
+          .report-incident-card:hover {
+            transform: translateY(-6px) scale(1.015);
+            box-shadow: 0 16px 30px -12px rgba(37, 99, 235, 0.55);
+            filter: saturate(1.08) brightness(1.03);
           }
           @media (max-width: 1024px) {
             .dashboard-layout {
