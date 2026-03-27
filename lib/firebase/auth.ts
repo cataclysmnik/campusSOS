@@ -131,7 +131,12 @@ export const getOrCreateUserProfile = async (user: User): Promise<UserProfile | 
       try {
         if (user.metadata?.creationTime) {
           const createdAt = user.metadata.creationTime;
-          const createdAtMs = createdAt instanceof Date ? createdAt.getTime() : createdAt;
+          const createdAtMs = new Date(createdAt).getTime();
+
+          if (Number.isNaN(createdAtMs)) {
+            continue;
+          }
+
           const now = Date.now();
           const ageSeconds = (now - createdAtMs) / 1000;
           
