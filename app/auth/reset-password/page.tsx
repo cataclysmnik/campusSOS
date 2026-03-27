@@ -1,12 +1,12 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { Suspense, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { confirmPasswordReset, verifyPasswordResetCode } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
 	const searchParams = useSearchParams();
 	const oobCode = useMemo(() => searchParams.get('oobCode') ?? '', [searchParams]);
 
@@ -131,5 +131,13 @@ export default function ResetPasswordPage() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+export default function ResetPasswordPage() {
+	return (
+		<Suspense fallback={null}>
+			<ResetPasswordForm />
+		</Suspense>
 	);
 }
